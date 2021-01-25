@@ -1,0 +1,50 @@
+package main
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/mebyus/ffd/cli"
+)
+
+func unknown(command *cli.Command) (err error) {
+	return fmt.Errorf("unknown command")
+}
+
+func help(command *cli.Command) (err error) {
+	return
+}
+
+func main() {
+	command := cli.Parse(os.Args[1:])
+
+	var executor func(command *cli.Command) error
+	switch command.Name {
+	case "download":
+		executor = download
+	case "parse":
+		executor = parse
+	case "fake":
+		executor = fake
+	case "help":
+		executor = help
+	case "add":
+		executor = add
+	case "check":
+		executor = check
+	case "suppress":
+		executor = suppress
+	case "list":
+		executor = list
+	default:
+		executor = unknown
+	}
+
+	err := executor(command)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	return
+}
