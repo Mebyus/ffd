@@ -21,10 +21,18 @@ type Check struct {
 type Info struct {
 	URL        string
 	Name       string
+	Words      int64
 	Suppressed bool
 	Created    time.Time
 	Chapters   []Chapter
 	Check      Check
+}
+
+func CountWords(cs []Chapter) (count int64) {
+	for i := range cs {
+		count += cs[i].Words
+	}
+	return
 }
 
 func Save(fics []Info) (err error) {

@@ -24,6 +24,7 @@ func Check() (err error) {
 		newChapters := fic.Compare(fics[i].Chapters, chapters)
 		fics[i].Check.NewChapters = newChapters
 		fics[i].Chapters = append(chapters, newChapters...)
+		fics[i].Words = fic.CountWords(fics[i].Chapters)
 		fics[i].Check.Date = time.Now()
 		if len(newChapters) != 0 {
 			fmt.Printf("%d new chapters in %s\n", len(newChapters), fics[i].URL)
