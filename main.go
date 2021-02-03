@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/mebyus/ffd/cli"
+	"github.com/mebyus/ffd/planner"
 )
 
 func unknown(command *cli.Command) (err error) {
@@ -39,7 +40,7 @@ func main() {
 	default:
 		executor = unknown
 	}
-
+	go planner.Planner()
 	err := executor(command)
 	if err != nil {
 		fmt.Println(err)

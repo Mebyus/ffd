@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/mebyus/ffd/cmn"
+	"github.com/mebyus/ffd/planner"
 	"golang.org/x/net/html"
 )
 
@@ -46,6 +47,7 @@ func (t *sbTools) Download(target string, saveSource bool) {
 		return
 	}
 	defer cmn.SmartClose(outfile)
+	// if saveSource {
 	for i, url := range urls {
 		fmt.Println(url)
 		err = t.getchapter(url, i+1, client, outfile)
@@ -55,6 +57,30 @@ func (t *sbTools) Download(target string, saveSource bool) {
 		}
 		fmt.Printf("page %3d [OK] ( %s )\n", i+1, t.ficName)
 	}
+	// } else {
+	// 	results := make(chan *planner.Result, 10)
+	// 	for _, url := range urls {
+	// 		task := gettask(url, results)
+	// 		planner.Tasks <- task
+	// 	}
+	// 	for range urls {
+	// 		result := <-results
+	// 		if result.Err != nil {
+	// 			fmt.Println(err)
+	// 			return
+	// 		}
+	// 		contentStr := parseChapter(result.Content)
+	// 		_, err = io.Copy(outfile, strings.NewReader(contentStr))
+	// 		if err != nil {
+	// 			err = fmt.Errorf("Saving chapter to destination: %v", err)
+	// 			return
+	// 		}
+	// 		closeErr := result.Content.Close()
+	// 		if closeErr != nil {
+	// 			fmt.Printf("Closing chapter response body: %v\n", closeErr)
+	// 		}
+	// 	}
+	// }
 }
 
 func geturls(target string, client *http.Client) (urls []string, err error) {
@@ -93,6 +119,14 @@ func geturls(target string, client *http.Client) (urls []string, err error) {
 		fmt.Printf("Closing table of contents response body: %v\n", closeErr)
 	}
 	return
+}
+
+func gettask(url string, ch chan<- *planner.Result) *planner.Task {
+	return &planner.Task{
+		Label:       "SB",
+		URL:         url,
+		Destination: ch,
+	}
 }
 
 func (t *sbTools) getchapter(url string, index int, client *http.Client, destination io.Writer) (err error) {
