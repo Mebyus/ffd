@@ -30,7 +30,7 @@ func NewHTTPRequestAccess(rawtarget string) (a *HTTPRequestAccess, err error) {
 
 func baseURL(url string) (base string, err error) {
 	split := strings.Split(url, "/")
-	if len(split) == 0 {
+	if len(split) < 2 {
 		err = fmt.Errorf("incorrect url")
 		return
 	}
@@ -38,7 +38,7 @@ func baseURL(url string) (base string, err error) {
 	if split[0] == "https:" || split[0] == "http" {
 		parts = 5
 	}
-	if len(split) < parts {
+	if len(split) < parts || split[parts-1] == "" {
 		err = fmt.Errorf("incorrect url")
 		return
 	}
