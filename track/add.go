@@ -12,7 +12,7 @@ func Add(target string) (err error) {
 	if err != nil {
 		return
 	}
-	fics, err := fic.Load()
+	fics, originpath, err := fic.Load("")
 	if err != nil {
 		return
 	}
@@ -24,7 +24,7 @@ func Add(target string) (err error) {
 	fics = append(fics, fic.Info{
 		URL: target,
 	})
-	err = fic.Save(fics)
+	err = fic.Save(originpath, fics)
 	if err != nil {
 		return
 	}

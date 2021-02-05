@@ -7,7 +7,7 @@ import (
 )
 
 func List() (err error) {
-	fics, err := fic.Load()
+	fics, _, err := fic.Load("")
 	if err != nil {
 		return
 	}

@@ -9,7 +9,7 @@ import (
 )
 
 func Check() (err error) {
-	fics, err := fic.Load()
+	fics, originpath, err := fic.Load("")
 	if err != nil {
 		return
 	}
@@ -30,7 +30,7 @@ func Check() (err error) {
 			fmt.Printf("%d new chapters in %s\n", len(newChapters), fics[i].URL)
 		}
 	}
-	err = fic.Save(fics)
+	err = fic.Save(originpath, fics)
 	if err != nil {
 		return
 	}

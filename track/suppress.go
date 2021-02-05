@@ -12,7 +12,7 @@ func Suppress(target string, resume bool) (err error) {
 	if err != nil {
 		return
 	}
-	fics, err := fic.Load()
+	fics, originpath, err := fic.Load("")
 	if err != nil {
 		return
 	}
@@ -22,7 +22,7 @@ func Suppress(target string, resume bool) (err error) {
 		return
 	}
 	fics[i].Suppressed = !resume
-	err = fic.Save(fics)
+	err = fic.Save(originpath, fics)
 	if err != nil {
 		return
 	}

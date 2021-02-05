@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -35,7 +37,7 @@ func CountWords(cs []Chapter) (count int64) {
 	return
 }
 
-func Save(fics []Info) (err error) {
+func Save(path string, fics []Info) (err error) {
 	b, err := json.MarshalIndent(fics, "", "    ")
 	if err != nil {
 		err = fmt.Errorf("encoding fics list: %v", err)
@@ -49,19 +51,100 @@ func Save(fics []Info) (err error) {
 	return
 }
 
-func Load() (fics []Info, err error) {
-	fics = make([]Info, 0)
-	b, err := ioutil.ReadFile("track.json")
+func Load(path string) (fics []Info, originpath string, err error) {
+	var b []byte
+	if path != "" {
+		b, err = ioutil.ReadFile(path)
+		if err != nil {
+			err = fmt.Errorf("reading fics list: %v", err)
+			return
+		}
+		fics = make([]Info, 0)
+		err = json.Unmarshal(b, &fics)
+		if err != nil {
+			err = fmt.Errorf("unmarshalling fics list: %v", err)
+			fics = nil
+			return
+		}
+		originpath = path
+		return
+	}
+	execpath, err := os.Executable()
 	if err != nil {
-		fmt.Printf("reading fics list: %v\nlist is treated as empty\n", err)
+		err = fmt.Errorf("cannot locate executable: %v", err)
+		return
+	}
+	execdir := filepath.Dir(execpath)
+	wdpath, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("cannot locate working directory: %v\n", err)
+	}
+	if err != nil || execdir == wdpath {
 		err = nil
+		originpath = filepath.Join(execdir, "track.json")
+		b, err = ioutil.ReadFile(originpath)
+		if err != nil {
+			if !os.IsNotExist(err) {
+				err = fmt.Errorf("reading fics list: %v", err)
+				originpath = ""
+				return
+			}
+			fics = make([]Info, 0)
+			fmt.Printf("track file doesn't exist, fic list is treated as empty\n")
+			return
+		}
+		fics = make([]Info, 0)
+		err = json.Unmarshal(b, &fics)
+		if err != nil {
+			err = fmt.Errorf("unmarshalling fics list: %v", err)
+			originpath = ""
+			fics = nil
+			return
+		}
 		return
 	}
-	err = json.Unmarshal(b, &fics)
-	if err != nil {
-		err = fmt.Errorf("unmarshalling fics list: %v", err)
+	originpath = filepath.Join(execdir, "track.json")
+	b, err = ioutil.ReadFile(originpath)
+	if err == nil {
+		fics = make([]Info, 0)
+		err = json.Unmarshal(b, &fics)
+		if err != nil {
+			err = fmt.Errorf("unmarshalling fics list: %v", err)
+			originpath = ""
+			fics = nil
+			return
+		}
+		return
+
+	}
+	if !os.IsNotExist(err) {
+		err = fmt.Errorf("reading fics list: %v", err)
+		originpath = ""
 		return
 	}
+	originpath = filepath.Join(wdpath, "track.json")
+	b, err = ioutil.ReadFile(originpath)
+	if err == nil {
+		fics = make([]Info, 0)
+		err = json.Unmarshal(b, &fics)
+		if err != nil {
+			err = fmt.Errorf("unmarshalling fics list: %v", err)
+			originpath = ""
+			fics = nil
+			return
+		}
+		return
+
+	}
+	if !os.IsNotExist(err) {
+		err = fmt.Errorf("reading fics list: %v", err)
+		originpath = ""
+		return
+	}
+	err = nil
+	originpath = filepath.Join(execdir, "track.json")
+	fics = make([]Info, 0)
+	fmt.Printf("track file doesn't exist, fic list is treated as empty\n")
 	return
 }
 
