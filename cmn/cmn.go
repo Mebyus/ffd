@@ -10,7 +10,7 @@ import (
 func SmartClose(c io.Closer) {
 	err := c.Close()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("closing: %v\n", err)
 	}
 	return
 }

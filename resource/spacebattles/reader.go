@@ -47,40 +47,40 @@ func (t *sbTools) Download(target string, saveSource bool) {
 		return
 	}
 	defer cmn.SmartClose(outfile)
-	// if saveSource {
-	for i, url := range urls {
-		fmt.Println(url)
-		err = t.getchapter(url, i+1, client, outfile)
-		if err != nil {
-			fmt.Println(err)
-			return
+	if saveSource {
+		for i, url := range urls {
+			fmt.Println(url)
+			err = t.getchapter(url, i+1, client, outfile)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Printf("page %3d [OK] ( %s )\n", i+1, t.ficName)
 		}
-		fmt.Printf("page %3d [OK] ( %s )\n", i+1, t.ficName)
+	} else {
+		results := make(chan *planner.Result, 10)
+		for _, url := range urls {
+			task := gettask(url, results)
+			planner.Tasks <- task
+		}
+		for _, url := range urls {
+			result := <-results
+			if result.Err != nil {
+				fmt.Printf("Obtaining result from %s: %v\n", url, result.Err)
+				return
+			}
+			contentStr := parseChapter(result.Content)
+			_, err = io.Copy(outfile, strings.NewReader(contentStr))
+			if err != nil {
+				err = fmt.Errorf("Saving chapter to destination: %v", err)
+				return
+			}
+			closeErr := result.Content.Close()
+			if closeErr != nil {
+				fmt.Printf("Closing chapter response body: %v\n", closeErr)
+			}
+		}
 	}
-	// } else {
-	// 	results := make(chan *planner.Result, 10)
-	// 	for _, url := range urls {
-	// 		task := gettask(url, results)
-	// 		planner.Tasks <- task
-	// 	}
-	// 	for range urls {
-	// 		result := <-results
-	// 		if result.Err != nil {
-	// 			fmt.Println(err)
-	// 			return
-	// 		}
-	// 		contentStr := parseChapter(result.Content)
-	// 		_, err = io.Copy(outfile, strings.NewReader(contentStr))
-	// 		if err != nil {
-	// 			err = fmt.Errorf("Saving chapter to destination: %v", err)
-	// 			return
-	// 		}
-	// 		closeErr := result.Content.Close()
-	// 		if closeErr != nil {
-	// 			fmt.Printf("Closing chapter response body: %v\n", closeErr)
-	// 		}
-	// 	}
-	// }
 }
 
 func geturls(target string, client *http.Client) (urls []string, err error) {
@@ -205,6 +205,7 @@ func parseChapter(page io.Reader) (content string) {
 				return
 			}
 			fmt.Printf("Page tokenization: %v\n", err)
+			return
 		case html.StartTagToken:
 			token := tokenizer.Token()
 			if token.Data == "article" {
@@ -315,6 +316,7 @@ func parseTableOfContents(page io.Reader) []string {
 				return pageNumbers
 			}
 			fmt.Printf("Table of contents tokenization: %v\n", err)
+			return []string{}
 		case html.StartTagToken:
 			token := tokenizer.Token()
 			if token.Data == "ul" && isPageNav(token.Attr) {

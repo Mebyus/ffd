@@ -31,7 +31,7 @@ var Tasks = make(chan *Task, 10)
 func Planner() {
 	pools := map[string]*pool{
 		"SB": {
-			max: 10,
+			max: 1,
 			cur: 0,
 		},
 		"RR": {
@@ -87,7 +87,9 @@ func Planner() {
 }
 
 func worker(task *Task, toGatherer chan<- *Task, client *http.Client) {
+	start := time.Now()
 	body, err := cmn.GetBody(task.URL, client)
+	fmt.Printf("%v spent for %s\n", time.Since(start), task.URL)
 	task.Result = &Result{
 		Content: body,
 		Err:     err,

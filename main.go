@@ -43,7 +43,7 @@ func main() {
 	go planner.Planner()
 	err := executor(command)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Command execution: %v\n", err)
 		return
 	}
 
