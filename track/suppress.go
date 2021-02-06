@@ -7,12 +7,12 @@ import (
 	"github.com/mebyus/ffd/track/fic"
 )
 
-func Suppress(target string, resume bool) (err error) {
+func Suppress(target, trackpath string, resume bool) (err error) {
 	_, err = url.Parse(target)
 	if err != nil {
 		return
 	}
-	fics, originpath, err := fic.Load("")
+	fics, originpath, err := fic.Load(trackpath)
 	if err != nil {
 		return
 	}

@@ -43,7 +43,7 @@ func Save(path string, fics []Info) (err error) {
 		err = fmt.Errorf("encoding fics list: %v", err)
 		return
 	}
-	err = ioutil.WriteFile("track.json", b, 0333)
+	err = ioutil.WriteFile(path, b, 0333)
 	if err != nil {
 		err = fmt.Errorf("saving fics list: %v", err)
 		return

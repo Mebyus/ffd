@@ -7,12 +7,12 @@ import (
 	"github.com/mebyus/ffd/track/fic"
 )
 
-func Add(target string) (err error) {
+func Add(target, trackpath string) (err error) {
 	_, err = url.Parse(target)
 	if err != nil {
 		return
 	}
-	fics, originpath, err := fic.Load("")
+	fics, originpath, err := fic.Load(trackpath)
 	if err != nil {
 		return
 	}

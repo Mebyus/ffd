@@ -6,8 +6,8 @@ import (
 	"github.com/mebyus/ffd/track/fic"
 )
 
-func List() (err error) {
-	fics, _, err := fic.Load("")
+func List(trackpath string) (err error) {
+	fics, _, err := fic.Load(trackpath)
 	if err != nil {
 		return
 	}

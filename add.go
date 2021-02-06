@@ -11,7 +11,8 @@ func add(command *cli.Command) (err error) {
 	if command.Target == "" {
 		return fmt.Errorf("\"add\" command: target is not specified")
 	}
-	err = track.Add(command.Target)
+	trackpath := command.Flags["track"]
+	err = track.Add(command.Target, trackpath)
 	if err != nil {
 		return
 	}

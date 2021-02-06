@@ -8,8 +8,8 @@ import (
 	"github.com/mebyus/ffd/track/fic"
 )
 
-func Check() (err error) {
-	fics, originpath, err := fic.Load("")
+func Check(trackpath string) (err error) {
+	fics, originpath, err := fic.Load(trackpath)
 	if err != nil {
 		return
 	}

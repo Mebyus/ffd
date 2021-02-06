@@ -12,7 +12,8 @@ func suppress(command *cli.Command) (err error) {
 		return fmt.Errorf("\"suppress\" command: target is not specified")
 	}
 	_, resume := command.Flags["r"]
-	err = track.Suppress(command.Target, resume)
+	trackpath := command.Flags["track"]
+	err = track.Suppress(command.Target, trackpath, resume)
 	if err != nil {
 		return
 	}
