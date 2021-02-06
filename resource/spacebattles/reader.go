@@ -294,14 +294,6 @@ func convert(pageNumber int64) string {
 	return fmt.Sprintf("page-%d", pageNumber)
 }
 
-func smartclose(c io.Closer) {
-	err := c.Close()
-	if err != nil {
-		fmt.Println(err)
-	}
-	return
-}
-
 func parseTableOfContents(page io.Reader) []string {
 	tokenizer := html.NewTokenizer(page)
 	insidePageNav := false
