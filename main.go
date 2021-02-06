@@ -25,8 +25,6 @@ func main() {
 		executor = download
 	case "parse":
 		executor = parse
-	case "fake":
-		executor = fake
 	case "help":
 		executor = help
 	case "add":
