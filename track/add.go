@@ -3,7 +3,9 @@ package track
 import (
 	"fmt"
 	"net/url"
+	"time"
 
+	"github.com/mebyus/ffd/resource"
 	"github.com/mebyus/ffd/track/fic"
 )
 
@@ -21,8 +23,17 @@ func Add(target, trackpath string) (err error) {
 		err = fmt.Errorf("already in the list")
 		return
 	}
+	chapters, err := resource.Check(target)
+	if err != nil {
+		return
+	}
 	fics = append(fics, fic.Info{
-		BaseURL: target,
+		BaseURL:  target,
+		Chapters: chapters,
+		Words:    fic.CountWords(chapters),
+		Check: fic.Check{
+			Time: time.Now(),
+		},
 	})
 	err = fic.Save(originpath, fics)
 	if err != nil {
