@@ -16,7 +16,7 @@ func List(trackpath string) (err error) {
 		if chapters == 0 {
 			fmt.Printf("%s %dk [ unknown ]\n", fics[i].Name, fics[i].Words/1000)
 		} else {
-			lastUpdate := fics[i].Chapters[chapters-1].Date
+			lastUpdate := fics[i].Chapters[chapters-1].Created
 			fmt.Printf("%s %dk [ %s ]\n", fics[i].Name, fics[i].Words/1000, lastUpdate.Format("02.01.2006"))
 		}
 	}

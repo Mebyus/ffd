@@ -14,10 +14,10 @@ func Check(trackpath string) (err error) {
 		return
 	}
 	for i := range fics {
-		if fics[i].Suppressed {
+		if fics[i].Check.Suppressed {
 			continue
 		}
-		chapters, err := resource.Check(fics[i].URL)
+		chapters, err := resource.Check(fics[i].BaseURL)
 		if err != nil {
 			return err
 		}
@@ -25,9 +25,9 @@ func Check(trackpath string) (err error) {
 		fics[i].Check.NewChapters = newChapters
 		fics[i].Chapters = append(chapters, newChapters...)
 		fics[i].Words = fic.CountWords(fics[i].Chapters)
-		fics[i].Check.Date = time.Now()
+		fics[i].Check.Time = time.Now()
 		if len(newChapters) != 0 {
-			fmt.Printf("%d new chapters in %s\n", len(newChapters), fics[i].URL)
+			fmt.Printf("%d new chapters in %s\n", len(newChapters), fics[i].BaseURL)
 		}
 	}
 	err = fic.Save(originpath, fics)

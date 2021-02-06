@@ -21,7 +21,7 @@ func Suppress(target, trackpath string, resume bool) (err error) {
 		err = fmt.Errorf("not on the list")
 		return
 	}
-	fics[i].Suppressed = !resume
+	fics[i].Check.Suppressed = !resume
 	err = fic.Save(originpath, fics)
 	if err != nil {
 		return

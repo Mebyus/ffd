@@ -22,7 +22,7 @@ func Add(target, trackpath string) (err error) {
 		return
 	}
 	fics = append(fics, fic.Info{
-		URL: target,
+		BaseURL: target,
 	})
 	err = fic.Save(originpath, fics)
 	if err != nil {

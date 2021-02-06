@@ -10,24 +10,29 @@ import (
 )
 
 type Chapter struct {
-	Name  string
-	Date  time.Time
-	Words int64
+	Name    string
+	Created time.Time
+	Words   int64
 }
 
 type Check struct {
-	Date        time.Time
+	Suppressed  bool
+	Time        time.Time
+	Words       int64
 	NewChapters []Chapter
 }
 
 type Info struct {
-	URL        string
-	Name       string
-	Words      int64
-	Suppressed bool
-	Created    time.Time
-	Chapters   []Chapter
-	Check      Check
+	BaseURL  string
+	Location Location
+	Name     string
+	Author   string
+	Words    int64
+	Finished bool
+	Created  time.Time
+	Updated  time.Time
+	Chapters []Chapter
+	Check    Check
 }
 
 func CountWords(cs []Chapter) (count int64) {
@@ -43,7 +48,7 @@ func Save(path string, fics []Info) (err error) {
 		err = fmt.Errorf("encoding fics list: %v", err)
 		return
 	}
-	err = ioutil.WriteFile(path, b, 0333)
+	err = ioutil.WriteFile(path, b, 0664)
 	if err != nil {
 		err = fmt.Errorf("saving fics list: %v", err)
 		return
@@ -167,7 +172,7 @@ func Compare(o, n []Chapter) (diff []Chapter) {
 func Find(fics []Info, target string) (index int) {
 	index = -1
 	for i := range fics {
-		if fics[i].URL == target {
+		if fics[i].BaseURL == target {
 			index = i
 			return
 		}

@@ -88,7 +88,7 @@ func parseThreadmarksPage(page io.Reader) (cs []fic.Chapter) {
 			} else if insideBody && token.Data == "dd" {
 				insideWordCount = true
 			} else if insideBody && token.Data == "time" {
-				threadmark.Date = extractDatetime(token.Attr)
+				threadmark.Created = extractDatetime(token.Attr)
 			}
 			depth++
 		case html.EndTagToken:
