@@ -80,6 +80,15 @@ func (d *Document) traverse() {
 	return
 }
 
+func HasClass(node *html.Node, class string) bool {
+	for _, attr := range node.Attr {
+		if attr.Key == "class" && strings.Contains(attr.Val, class) {
+			return true
+		}
+	}
+	return false
+}
+
 func extract(attrs []html.Attribute) (id string, classes []string) {
 	for _, attr := range attrs {
 		switch attr.Key {

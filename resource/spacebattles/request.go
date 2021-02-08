@@ -15,7 +15,7 @@ type HTTPRequestAccess struct {
 }
 
 func NewHTTPRequestAccess(rawtarget string) (a *HTTPRequestAccess, err error) {
-	target, err := baseURL(rawtarget)
+	target, _, err := analyze(rawtarget)
 	if err != nil {
 		return
 	}
@@ -28,7 +28,7 @@ func NewHTTPRequestAccess(rawtarget string) (a *HTTPRequestAccess, err error) {
 	return
 }
 
-func baseURL(url string) (base string, err error) {
+func analyze(url string) (base, name string, err error) {
 	split := strings.Split(url, "/")
 	if len(split) < 2 {
 		err = fmt.Errorf("incorrect url")
@@ -42,6 +42,7 @@ func baseURL(url string) (base string, err error) {
 		err = fmt.Errorf("incorrect url")
 		return
 	}
+	name = strings.Split(split[parts-1], ".")[0]
 	base = strings.Join(split[:parts], "/")
 	return
 }
@@ -56,13 +57,13 @@ func (a *HTTPRequestAccess) GetChaptersListContainer() (container io.ReadCloser,
 	return
 }
 
-func (a *HTTPRequestAccess) GetPieceContainer(pieceNumber int) (container io.ReadCloser, err error) {
-	container, err = cmn.GetBody(a.readerPageURL(pieceNumber), a.client)
+func (a *HTTPRequestAccess) GetPieceContainer(pieceNumber int64) (container io.ReadCloser, err error) {
+	container, err = cmn.GetBody(readerPageURL(a.target, pieceNumber), a.client)
 	return
 }
 
-func (a *HTTPRequestAccess) readerPageURL(pageNumber int) string {
-	url := a.target + "/reader"
+func readerPageURL(baseURL string, pageNumber int64) string {
+	url := baseURL + "/reader"
 	if pageNumber == 1 {
 		return url
 	}

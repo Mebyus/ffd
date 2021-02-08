@@ -37,11 +37,11 @@ func parsePiece(source io.Reader) (result io.Reader, pages int64, err error) {
 	if len(threadmarks) != len(chapters) {
 		fmt.Printf("number of threadmarks (%d) and chapters (%d) does not match\n", len(threadmarks), len(chapters))
 		for i := range chapters {
-			readers[i] = strings.NewReader(chapters[i])
+			readers[i] = strings.NewReader("\n\n" + chapters[i])
 		}
 	} else {
 		for i := range chapters {
-			readers[i] = strings.NewReader(threadmarks[i] + "\n\n" + chapters[i])
+			readers[i] = strings.NewReader("\n\n" + threadmarks[i] + "\n\n" + chapters[i])
 		}
 	}
 	result = io.MultiReader(readers...)
@@ -59,7 +59,9 @@ func extractNumberOfPages(pageNav *html.Node) (pages int64) {
 
 func extractChapters(posts []*html.Node) (chapters []string) {
 	for _, post := range posts {
-		chapters = append(chapters, extractChapter(post))
+		if !document.HasClass(post.Parent, "threadmarkListingHeader-extraInfoChild") {
+			chapters = append(chapters, extractChapter(post))
+		}
 	}
 	return
 }

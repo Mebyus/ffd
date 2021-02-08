@@ -9,6 +9,8 @@ import (
 	"github.com/mebyus/ffd/cmn"
 )
 
+const Timeout = 15 * time.Second
+
 type pool struct {
 	max int
 	cur int
@@ -26,7 +28,12 @@ type Task struct {
 	Destination chan<- *Result
 }
 
-var Tasks = make(chan *Task, 10)
+var (
+	Tasks  = make(chan *Task, 10)
+	Client = &http.Client{
+		Timeout: Timeout,
+	}
+)
 
 func Planner() {
 	pools := map[string]*pool{
@@ -43,9 +50,6 @@ func Planner() {
 	for key := range pools {
 		pending[key] = &[]*Task{}
 	}
-	client := &http.Client{
-		Timeout: 15 * time.Second,
-	}
 	toGatherer := make(chan *Task, 10)
 	notifications := make(chan string, 10)
 	go gatherer(toGatherer, notifications)
@@ -55,7 +59,7 @@ func Planner() {
 			p, allowed := pools[task.Label]
 			if allowed {
 				if p.cur < p.max {
-					go worker(task, toGatherer, client)
+					go worker(task, toGatherer, Client)
 					p.cur++
 					fmt.Printf("%s: %d # %s\n", task.Label, p.cur, task.URL)
 				} else {
@@ -74,7 +78,7 @@ func Planner() {
 				queue := pending[notification]
 				if len(*queue) > 0 {
 					task := (*queue)[0]
-					go worker(task, toGatherer, client)
+					go worker(task, toGatherer, Client)
 					p.cur++
 					fmt.Printf("%s: %d # %s\n", task.Label, p.cur, task.URL)
 					*queue = (*queue)[1:]

@@ -2,7 +2,7 @@ package spacebattles
 
 import "testing"
 
-func Test_baseURL(t *testing.T) {
+func Test_analyze(t *testing.T) {
 	type args struct {
 		url string
 	}
@@ -10,6 +10,7 @@ func Test_baseURL(t *testing.T) {
 		name     string
 		args     args
 		wantBase string
+		wantName string
 		wantErr  bool
 	}{
 		{
@@ -18,6 +19,7 @@ func Test_baseURL(t *testing.T) {
 				url: "",
 			},
 			wantBase: "",
+			wantName: "",
 			wantErr:  true,
 		},
 		{
@@ -26,6 +28,7 @@ func Test_baseURL(t *testing.T) {
 				url: "fneionwfo",
 			},
 			wantBase: "",
+			wantName: "",
 			wantErr:  true,
 		},
 		{
@@ -34,6 +37,7 @@ func Test_baseURL(t *testing.T) {
 				url: "https://forums.spacebattles.com/threads/",
 			},
 			wantBase: "",
+			wantName: "",
 			wantErr:  true,
 		},
 		{
@@ -42,6 +46,7 @@ func Test_baseURL(t *testing.T) {
 				url: "https://forums.spacebattles.com/threads/crystalized-munchkinry-worm-au-shard-si-fix-it.897992/",
 			},
 			wantBase: "https://forums.spacebattles.com/threads/crystalized-munchkinry-worm-au-shard-si-fix-it.897992",
+			wantName: "crystalized-munchkinry-worm-au-shard-si-fix-it",
 			wantErr:  false,
 		},
 		{
@@ -50,6 +55,7 @@ func Test_baseURL(t *testing.T) {
 				url: "https://forums.spacebattles.com/threads/crystalized-munchkinry-worm-au-shard-si-fix-it.897992",
 			},
 			wantBase: "https://forums.spacebattles.com/threads/crystalized-munchkinry-worm-au-shard-si-fix-it.897992",
+			wantName: "crystalized-munchkinry-worm-au-shard-si-fix-it",
 			wantErr:  false,
 		},
 		{
@@ -58,6 +64,7 @@ func Test_baseURL(t *testing.T) {
 				url: "https://forums.spacebattles.com/threads/crystalized-munchkinry-worm-au-shard-si-fix-it.897992/reader",
 			},
 			wantBase: "https://forums.spacebattles.com/threads/crystalized-munchkinry-worm-au-shard-si-fix-it.897992",
+			wantName: "crystalized-munchkinry-worm-au-shard-si-fix-it",
 			wantErr:  false,
 		},
 		{
@@ -66,18 +73,19 @@ func Test_baseURL(t *testing.T) {
 				url: "https://forums.spacebattles.com/threads/crystalized-munchkinry-worm-au-shard-si-fix-it.897992/reader/page-3",
 			},
 			wantBase: "https://forums.spacebattles.com/threads/crystalized-munchkinry-worm-au-shard-si-fix-it.897992",
+			wantName: "crystalized-munchkinry-worm-au-shard-si-fix-it",
 			wantErr:  false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotBase, err := baseURL(tt.args.url)
+			gotBase, gotName, err := analyze(tt.args.url)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("baseURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if gotBase != tt.wantBase {
-				t.Errorf("baseURL() = %v, want %v", gotBase, tt.wantBase)
+			if gotBase != tt.wantBase || gotName != tt.wantName {
+				t.Errorf("baseURL() = %v, %v, want %v, %v", gotBase, gotName, tt.wantBase, tt.wantName)
 			}
 		})
 	}

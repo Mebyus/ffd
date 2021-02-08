@@ -23,64 +23,150 @@ const outdir = "out"
 const sourcedir = "source"
 
 func (t *sbTools) Download(target string, saveSource bool) {
-	client := &http.Client{
-		Timeout: timeout,
-	}
-	t.saveSource = saveSource
-	t.ficName = getFicName(target)
-	urls, err := geturls(target, client)
+	fmt.Printf("Analyzing URL\n")
+	baseURL, name, err := analyze(target)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	t.chapters = len(urls)
-	fmt.Printf("%d pages ( %s ) from %s\n", len(urls), t.ficName, Hostname)
-	err = os.MkdirAll(outdir, 0766)
+	fmt.Printf("URL is correct. Base part: [ %s ]\n", baseURL)
+	fmt.Printf("Fic designation set to [ %s ]\n", name)
+
+	fmt.Printf("Started downloading [ %s ]\n", name)
+	err = downloadSync(baseURL, name, saveSource, planner.Client)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	outpath := filepath.Join(outdir, t.ficName+".txt")
+	fmt.Printf("Finished downloading [ %s ]\n", name)
+	return
+	// } else {
+	// 	results := make(chan *planner.Result, 10)
+	// 	for _, url := range urls {
+	// 		task := gettask(url, results)
+	// 		planner.Tasks <- task
+	// 	}
+	// 	for _, url := range urls {
+	// 		result := <-results
+	// 		if result.Err != nil {
+	// 			fmt.Printf("Obtaining result from %s: %v\n", url, result.Err)
+	// 			return
+	// 		}
+	// 		contentStr := parseChapter(result.Content)
+	// 		_, err = io.Copy(outfile, strings.NewReader(contentStr))
+	// 		if err != nil {
+	// 			err = fmt.Errorf("Saving chapter to destination: %v", err)
+	// 			return
+	// 		}
+	// 		closeErr := result.Content.Close()
+	// 		if closeErr != nil {
+	// 			fmt.Printf("Closing chapter response body: %v\n", closeErr)
+	// 		}
+	// 	}
+	// }
+}
+
+func downloadAsync(target string, saveSource bool) (err error) {
+	return
+}
+
+func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (err error) {
+	fmt.Printf("Downloading first page...\n")
+	firstPage, err := cmn.GetBody(readerPageURL(baseURL, 1), client)
+	if err != nil {
+		return
+	}
+	defer cmn.SmartClose(firstPage)
+
+	err = os.MkdirAll(outdir, 0774)
+	if err != nil {
+		return
+	}
+	outpath := filepath.Join(outdir, name+".txt")
 	outfile, err := os.Create(outpath)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer cmn.SmartClose(outfile)
+	fmt.Printf("Output file: %s\n", outpath)
+
+	var teeFirstPage io.Reader
+	savedir := filepath.Join(sourcedir, name)
 	if saveSource {
-		for i, url := range urls {
-			fmt.Println(url)
-			err = t.getchapter(url, i+1, client, outfile)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			fmt.Printf("page %3d [OK] ( %s )\n", i+1, t.ficName)
+		err = os.MkdirAll(savedir, 0774)
+		if err != nil {
+			return
 		}
+		fmt.Printf("Source files will be saved to: %s\n", savedir)
+		fp := filepath.Join(savedir, "1.html")
+		sourcefile, err := os.Create(fp)
+		if err != nil {
+			return err
+		}
+		defer cmn.SmartClose(sourcefile)
+		teeFirstPage = io.TeeReader(firstPage, sourcefile)
 	} else {
-		results := make(chan *planner.Result, 10)
-		for _, url := range urls {
-			task := gettask(url, results)
-			planner.Tasks <- task
+		teeFirstPage = firstPage
+	}
+
+	fmt.Printf("Parsing first page...\n")
+	parsedFirstPage, pages, err := parsePiece(teeFirstPage)
+	if err != nil {
+		return
+	}
+	_, err = io.Copy(outfile, parsedFirstPage)
+	if err != nil {
+		return
+	}
+	fmt.Printf("First page parsed. Fic contains %d pages total\n", pages)
+
+	filenames := sourceFilenames(pages)
+	for i := int64(2); i <= pages; i++ {
+		fmt.Printf("Downloading page %3d / %d\n", i, pages)
+		page, err := cmn.GetBody(readerPageURL(baseURL, i), client)
+		if err != nil {
+			return err
 		}
-		for _, url := range urls {
-			result := <-results
-			if result.Err != nil {
-				fmt.Printf("Obtaining result from %s: %v\n", url, result.Err)
-				return
-			}
-			contentStr := parseChapter(result.Content)
-			_, err = io.Copy(outfile, strings.NewReader(contentStr))
+		defer cmn.SmartClose(page)
+
+		var teePage io.Reader
+		if saveSource {
+			fp := filepath.Join(savedir, filenames[i-1])
+			sourcefile, err := os.Create(fp)
 			if err != nil {
-				err = fmt.Errorf("Saving chapter to destination: %v", err)
-				return
+				return err
 			}
-			closeErr := result.Content.Close()
-			if closeErr != nil {
-				fmt.Printf("Closing chapter response body: %v\n", closeErr)
-			}
+			defer cmn.SmartClose(sourcefile)
+			teePage = io.TeeReader(page, sourcefile)
+		} else {
+			teePage = page
+		}
+
+		parsedPage, _, err := parsePiece(teePage)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(outfile, parsedPage)
+		if err != nil {
+			return err
 		}
 	}
+	return
+}
+
+func sourceFilenames(maxIndex int64) (filenames []string) {
+	maxIndexStr := fmt.Sprintf("%d", maxIndex)
+	for i := int64(1); i <= maxIndex; i++ {
+		indexStr := fmt.Sprintf("%d", i)
+		formatStr := ""
+		if len(maxIndexStr)-len(indexStr) > 0 {
+			formatStr = strings.Repeat("0", len(maxIndexStr)-len(indexStr)) + "%d.html"
+		} else {
+			formatStr = "%d.html"
+		}
+		filenames = append(filenames, fmt.Sprintf(formatStr, i))
+	}
+	return
 }
 
 func geturls(target string, client *http.Client) (urls []string, err error) {
