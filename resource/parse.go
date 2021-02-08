@@ -40,6 +40,10 @@ func parseTogether(name, dirpath, hostname string, dirnames []string) (err error
 	if err != nil {
 		return
 	}
+	err = os.MkdirAll("out", 0766)
+	if err != nil {
+		return
+	}
 	outpath := filepath.Join("out", name+".txt")
 	outfile, err := os.Create(outpath)
 	if err != nil {

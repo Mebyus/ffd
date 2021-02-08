@@ -187,76 +187,77 @@ func (t *sbTools) getchapter(url string, index int, client *http.Client, destina
 }
 
 func parseChapter(page io.Reader) (content string) {
-	tokenizer := html.NewTokenizer(page)
-	depth := 0
-	insideChapter := false
-	insideArticle := false
-	insideThreadmark := false
-	chapterDepth := 0
-	articleDepth := 0
-	insertNewline := false
-	insertSpace := false
-	for {
-		tokenType := tokenizer.Next()
-		switch tokenType {
-		case html.ErrorToken:
-			err := tokenizer.Err()
-			if err == io.EOF {
-				return
-			}
-			fmt.Printf("Page tokenization: %v\n", err)
-			return
-		case html.StartTagToken:
-			token := tokenizer.Token()
-			if token.Data == "article" {
-				insideArticle = true
-				articleDepth = depth
-			} else if insideArticle && !insideChapter && token.Data == "span" && isThreadmark(token.Attr) {
-				insideThreadmark = true
-			} else if insideArticle && !insideChapter && token.Data == "div" && isPostWrapper(token.Attr) {
-				insideChapter = true
-				chapterDepth = depth
-			} else if insideChapter && (token.Data == "i" || token.Data == "b") {
-				content += " "
-				insertSpace = true
-			}
-			depth++
-		case html.SelfClosingTagToken:
-			token := tokenizer.Token()
-			if insideChapter && token.Data == "br" {
-				content += "\n"
-				insertNewline = true
-			}
-		case html.EndTagToken:
-			depth--
-			token := tokenizer.Token()
-			if token.Data == "article" && articleDepth == depth {
-				insideArticle = false
-			} else if insideThreadmark && token.Data == "span" {
-				insideThreadmark = false
-			} else if insideChapter && token.Data == "div" && chapterDepth == depth {
-				insideChapter = false
-				content += "\n\n"
-			}
-		case html.TextToken:
-			token := tokenizer.Token()
-			if insideThreadmark {
-				content += strings.TrimSpace(token.Data) + "\n\n"
-			}
-			if insideChapter {
-				if insertNewline {
-					content += strings.TrimSpace(token.Data)
-					insertNewline = false
-					insertSpace = false
-				} else if insertSpace {
-					content += strings.TrimSpace(token.Data) + " "
-					insertSpace = false
-				} else {
-					content += strings.TrimSpace(token.Data)
-				}
-			}
-		}
-	}
+	return
+	// tokenizer := html.NewTokenizer(page)
+	// depth := 0
+	// insideChapter := false
+	// insideArticle := false
+	// insideThreadmark := false
+	// chapterDepth := 0
+	// articleDepth := 0
+	// insertNewline := false
+	// insertSpace := false
+	// for {
+	// 	tokenType := tokenizer.Next()
+	// 	switch tokenType {
+	// 	case html.ErrorToken:
+	// 		err := tokenizer.Err()
+	// 		if err == io.EOF {
+	// 			return
+	// 		}
+	// 		fmt.Printf("Page tokenization: %v\n", err)
+	// 		return
+	// 	case html.StartTagToken:
+	// 		token := tokenizer.Token()
+	// 		if token.Data == "article" {
+	// 			insideArticle = true
+	// 			articleDepth = depth
+	// 		} else if insideArticle && !insideChapter && token.Data == "span" && isThreadmark(token.Attr) {
+	// 			insideThreadmark = true
+	// 		} else if insideArticle && !insideChapter && token.Data == "div" && isPostWrapper(token.Attr) {
+	// 			insideChapter = true
+	// 			chapterDepth = depth
+	// 		} else if insideChapter && (token.Data == "i" || token.Data == "b") {
+	// 			content += " "
+	// 			insertSpace = true
+	// 		}
+	// 		depth++
+	// 	case html.SelfClosingTagToken:
+	// 		token := tokenizer.Token()
+	// 		if insideChapter && token.Data == "br" {
+	// 			content += "\n"
+	// 			insertNewline = true
+	// 		}
+	// 	case html.EndTagToken:
+	// 		depth--
+	// 		token := tokenizer.Token()
+	// 		if token.Data == "article" && articleDepth == depth {
+	// 			insideArticle = false
+	// 		} else if insideThreadmark && token.Data == "span" {
+	// 			insideThreadmark = false
+	// 		} else if insideChapter && token.Data == "div" && chapterDepth == depth {
+	// 			insideChapter = false
+	// 			content += "\n\n"
+	// 		}
+	// 	case html.TextToken:
+	// 		token := tokenizer.Token()
+	// 		if insideThreadmark {
+	// 			content += strings.TrimSpace(token.Data) + "\n\n"
+	// 		}
+	// 		if insideChapter {
+	// 			if insertNewline {
+	// 				content += strings.TrimSpace(token.Data)
+	// 				insertNewline = false
+	// 				insertSpace = false
+	// 			} else if insertSpace {
+	// 				content += strings.TrimSpace(token.Data) + " "
+	// 				insertSpace = false
+	// 			} else {
+	// 				content += strings.TrimSpace(token.Data)
+	// 			}
+	// 		}
+	// 	}
+	// }
 }
 
 func getFicName(target string) string {
