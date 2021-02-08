@@ -1,10 +1,8 @@
 package royalroad
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"net/http"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -15,41 +13,6 @@ type result struct {
 	url     string
 	err     error
 	content io.Reader
-}
-
-func getchapter(url string, index int, out chan<- result, client *http.Client) {
-	res := result{
-		index: index,
-		url:   url,
-	}
-	request, err := http.NewRequest("GET", url, bytes.NewReader([]byte{}))
-	if err != nil {
-		err = fmt.Errorf("Composing chapter request: %v", err)
-		res.err = err
-		out <- res
-		return
-	}
-	response, err := client.Do(request)
-	if err != nil {
-		err = fmt.Errorf("Doing chapter request: %v", err)
-		res.err = err
-		out <- res
-		return
-	}
-	if response.StatusCode != http.StatusOK {
-		err = fmt.Errorf("Chapter response: %s", response.Status)
-		res.err = err
-		out <- res
-		return
-	}
-	contentStr := parseChapter(response.Body)
-	res.content = strings.NewReader(contentStr)
-	closeErr := response.Body.Close()
-	if closeErr != nil {
-		fmt.Printf("Closing chapter response body: %v\n", closeErr)
-	}
-	out <- res
-	return
 }
 
 func parseChapter(page io.Reader) (content string) {
