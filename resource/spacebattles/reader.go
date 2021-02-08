@@ -68,11 +68,14 @@ func downloadAsync(target string, saveSource bool) (err error) {
 }
 
 func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (err error) {
-	fmt.Printf("Downloading first page...\n")
+	fmt.Printf("Downloading first page...")
+	start := time.Now()
 	firstPage, err := cmn.GetBody(readerPageURL(baseURL, 1), client)
 	if err != nil {
+		fmt.Println()
 		return
 	}
+	fmt.Printf(" [ OK ] %v\n", time.Since(start))
 	defer cmn.SmartClose(firstPage)
 
 	err = os.MkdirAll(outdir, 0774)
@@ -107,10 +110,12 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 	}
 
 	fmt.Printf("Parsing first page...\n")
+	start = time.Now()
 	parsedFirstPage, pages, err := parsePiece(teeFirstPage)
 	if err != nil {
 		return
 	}
+	parsingDuration := time.Since(start)
 	_, err = io.Copy(outfile, parsedFirstPage)
 	if err != nil {
 		return
@@ -119,11 +124,14 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 
 	filenames := sourceFilenames(pages)
 	for i := int64(2); i <= pages; i++ {
-		fmt.Printf("Downloading page %3d / %d\n", i, pages)
+		fmt.Printf("Downloading page %3d / %d", i, pages)
+		start = time.Now()
 		page, err := cmn.GetBody(readerPageURL(baseURL, i), client)
 		if err != nil {
+			fmt.Println()
 			return err
 		}
+		fmt.Printf("  [ OK ] %v\n", time.Since(start))
 		defer cmn.SmartClose(page)
 
 		var teePage io.Reader
@@ -139,15 +147,19 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 			teePage = page
 		}
 
+		start = time.Now()
 		parsedPage, _, err := parsePiece(teePage)
 		if err != nil {
 			return err
 		}
+		parsingDuration += time.Since(start)
 		_, err = io.Copy(outfile, parsedPage)
 		if err != nil {
 			return err
 		}
 	}
+	fmt.Printf("Parsing %d pages took: %v (%v per page)\n", pages, parsingDuration,
+		parsingDuration/time.Duration(pages))
 	return
 }
 

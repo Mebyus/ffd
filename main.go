@@ -12,10 +12,6 @@ func unknown(command *cli.Command) (err error) {
 	return fmt.Errorf("unknown command")
 }
 
-func help(command *cli.Command) (err error) {
-	return
-}
-
 func main() {
 	command := cli.Parse(os.Args[1:])
 
