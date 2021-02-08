@@ -16,6 +16,7 @@ import (
 const timeout = 15.0 * time.Second
 const Hostname = "www.royalroad.com"
 const sourcedir = "source"
+const outdir = "out"
 
 func (t *rrTools) Download(target string, saveSource bool) {
 	client := &http.Client{
@@ -51,28 +52,6 @@ func (t *rrTools) Download(target string, saveSource bool) {
 		}
 		fmt.Printf("page %3d [OK] ( %s )\n", i+1, t.ficName)
 	}
-	// resOut := make(chan result, len(urls))
-	// for index, url := range urls {
-	// 	go getchapter(url, index, resOut, client)
-	// }
-
-	// inRes := make(chan result, len(urls))
-	// successRes := make(chan error, 1)
-	// go gatherall(len(urls), 1, inRes, successRes)
-
-	// for range urls {
-	// 	newResult := <-resOut
-	// 	if newResult.err != nil {
-	// 		fmt.Printf("%d [%s]: %v", newResult.index, newResult.url, newResult.err)
-	// 		return
-	// 	}
-	// 	inRes <- newResult
-	// }
-	// err = <-successRes
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
 	return
 }
 
