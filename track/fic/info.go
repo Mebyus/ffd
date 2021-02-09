@@ -23,22 +23,31 @@ type Check struct {
 }
 
 type Info struct {
-	BaseURL  string
-	Location Location
-	Name     string
-	Author   string
-	Words    int64
-	Finished bool
-	Created  time.Time
-	Updated  time.Time
-	Chapters []Chapter
-	Check    Check
+	BaseURL    string
+	Location   Location
+	Name       string
+	Author     string
+	Annotation string
+	Words      int64
+	Finished   bool
+	Created    time.Time
+	Updated    time.Time
+	Chapters   []Chapter
+	Check      Check
 }
 
-func CountWords(cs []Chapter) (count int64) {
-	for i := range cs {
-		count += cs[i].Words
+func CountWords(chapters []Chapter) (count int64) {
+	for i := range chapters {
+		count += chapters[i].Words
 	}
+	return
+}
+
+func UpdatedTime(chapters []Chapter) (t time.Time) {
+	if len(chapters) == 0 {
+		return
+	}
+	t = chapters[len(chapters)-1].Created
 	return
 }
 

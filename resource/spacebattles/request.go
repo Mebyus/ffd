@@ -69,3 +69,7 @@ func readerPageURL(baseURL string, pageNumber int64) string {
 	}
 	return url + fmt.Sprintf("/page-%d", pageNumber)
 }
+
+func indexPageURL(baseURL string) string {
+	return baseURL + "/threadmarks"
+}

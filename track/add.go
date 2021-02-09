@@ -22,19 +22,17 @@ func Add(target, trackpath string) (err error) {
 		err = fmt.Errorf("already in the list")
 		return
 	}
-	chapters, err := resource.Check(target)
+	newfic, err := resource.Check(target)
 	if err != nil {
 		return
 	}
-	fics = append(fics, fic.Info{
-		BaseURL:  target,
-		Location: location,
-		Chapters: chapters,
-		Words:    fic.CountWords(chapters),
-		Check: fic.Check{
-			Time: time.Now(),
-		},
-	})
+	newfic.Location = location
+	newfic.Words = fic.CountWords(newfic.Chapters)
+	newfic.Updated = fic.UpdatedTime(newfic.Chapters)
+	newfic.Check = fic.Check{
+		Time: time.Now(),
+	}
+	fics = append(fics, *newfic)
 	err = fic.Save(originpath, fics)
 	if err != nil {
 		return

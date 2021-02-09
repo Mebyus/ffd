@@ -1,157 +1,159 @@
 package spacebattles
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/mebyus/ffd/cmn"
+	"github.com/mebyus/ffd/document"
+	"github.com/mebyus/ffd/planner"
 	"github.com/mebyus/ffd/track/fic"
 	"golang.org/x/net/html"
 )
 
-func (t *sbTools) Check(target string) (cs []fic.Chapter) {
-	client := &http.Client{
-		Timeout: timeout,
-	}
-	cs, err := getThreadmarks(getThreadmarksURL(target), client)
+func (t *sbTools) Check(target string) (f *fic.Info) {
+	baseURL, _, err := analyze(target)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	fmt.Printf("Downloading index page...")
+	start := time.Now()
+	indexPage, err := cmn.GetBody(indexPageURL(baseURL), planner.Client)
+	if err != nil {
+		fmt.Printf("\n%v\n", err)
+		return
+	}
+	fmt.Printf(" [ OK ] %v\n", time.Since(start))
+	defer cmn.SmartClose(indexPage)
+
+	f, err = parseThreadmarksPage(indexPage)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	f.BaseURL = baseURL
+	f.Location = fic.SpaceBattles
 	return
 }
 
-func getThreadmarksURL(target string) string {
-	return target + "threadmarks/"
-}
-
-func getThreadmarks(url string, client *http.Client) (cs []fic.Chapter, err error) {
-	request, err := http.NewRequest("GET", url, bytes.NewReader([]byte{}))
+func parseThreadmarksPage(source io.Reader) (f *fic.Info, err error) {
+	n, err := html.Parse(source)
 	if err != nil {
-		err = fmt.Errorf("Composing chapter request: %v", err)
 		return
 	}
-	response, err := client.Do(request)
-	if err != nil {
-		err = fmt.Errorf("Doing chapter request: %v", err)
-		return
-	}
-	if response.StatusCode != http.StatusOK {
-		err = fmt.Errorf("Chapter response: %s [ %s ]", response.Status, url)
-		return
-	}
-	cs = parseThreadmarksPage(response.Body)
-	closeErr := response.Body.Close()
-	if closeErr != nil {
-		fmt.Printf("Closing chapter response body: %v\n", closeErr)
+	d := document.FromNode(n)
+	name := extractFicName(d)
+	author := extractAuthor(d)
+	annotation := extractAnnotation(d)
+	created := extractCreatedTime(d)
+	chapters := extractThreadmarkList(d)
+	f = &fic.Info{
+		Name:       name,
+		Created:    created,
+		Annotation: annotation,
+		Author:     author,
+		Chapters:   chapters,
 	}
 	return
 }
 
-func parseThreadmarksPage(page io.Reader) (cs []fic.Chapter) {
-	tokenizer := html.NewTokenizer(page)
-	depth := 0
-	insideBody := false
-	insideLink := false
-	insideTitle := false
-	insideWordCount := false
-	bodyDepth := 0
-	titleDepth := 0
-	itemDepth := 0
-	threadmark := fic.Chapter{}
-	for {
-		tokenType := tokenizer.Next()
-		switch tokenType {
-		case html.ErrorToken:
-			err := tokenizer.Err()
-			if err == io.EOF {
-				return
-			}
-			fmt.Printf("Page tokenization: %v\n", err)
-		case html.StartTagToken:
-			token := tokenizer.Token()
-			if !insideBody && token.Data == "div" && isBody(token.Attr) {
-				insideBody = true
-				bodyDepth = depth
-			} else if insideBody && token.Data == "div" && isThreadmarkItem(token.Attr) {
-				threadmark = fic.Chapter{}
-				itemDepth = depth
-			} else if insideBody && token.Data == "div" && isThreadmarkTitle(token.Attr) {
-				insideTitle = true
-				titleDepth = depth
-			} else if insideBody && token.Data == "a" {
-				insideLink = true
-			} else if insideBody && token.Data == "dd" {
-				insideWordCount = true
-			} else if insideBody && token.Data == "time" {
-				threadmark.Created = extractDatetime(token.Attr)
-			}
-			depth++
-		case html.EndTagToken:
-			depth--
-			token := tokenizer.Token()
-			if insideBody && bodyDepth == depth && token.Data == "div" {
-				insideBody = false
-			} else if insideBody && itemDepth == depth && token.Data == "div" {
-				if threadmark.Name != "" {
-					cs = append(cs, threadmark)
-				}
-			} else if insideBody && titleDepth == depth && token.Data == "div" {
-				insideTitle = false
-			} else if insideBody && token.Data == "a" {
-				insideLink = false
-			} else if insideBody && token.Data == "dd" {
-				insideWordCount = false
-			}
-		case html.TextToken:
-			token := tokenizer.Token()
-			if insideTitle && insideLink {
-				threadmark.Name = token.Data
-			}
-			if insideWordCount {
-				threadmark.Words = convertWordCount(token.Data)
-			}
-		}
+func extractThreadmarkList(d *document.Document) (list []fic.Chapter) {
+	containers := d.GetNodesByClass("structItemContainer")
+	if len(containers) == 0 {
+		fmt.Println("unable to locate list container")
+		return
+	} else if len(containers) > 1 {
+		fmt.Println("located several potential list containers")
 	}
+	datetimes := document.FindAttributeValues(containers[0], "datetime")
+	listItems := d.GetNodesByClass("structItem--threadmark")
+	if len(datetimes) != len(listItems) {
+		fmt.Printf("number of dates (%d) and threadmarks (%d) doesn't match\n", len(datetimes), len(listItems))
+	}
+	j := 0
+	for i, node := range listItems {
+		if j == len(datetimes) {
+			break
+		}
+		row := document.FindNonSpaceTexts(node)
+		if len(row) != 4 && len(row) != 5 {
+			fmt.Printf("wrong number of elements (%d) in row %d\n", len(row), i+1)
+			continue
+		} else if len(row) == 5 {
+			row = row[1:]
+		}
+
+		created, err := time.Parse("2006-01-02T15:04:05-0700", datetimes[j])
+		if err != nil {
+			fmt.Printf("unable to parse chapter creation time [ %s ]: %v\n", datetimes[j], err)
+		}
+		name := row[0]
+		words := convertWordCount(row[2])
+		list = append(list, fic.Chapter{
+			Name:    name,
+			Words:   words,
+			Created: created,
+		})
+		j++
+	}
+	return
 }
 
-func isBody(attrs []html.Attribute) bool {
-	for _, attr := range attrs {
-		if attr.Key == "class" && strings.Contains(attr.Val, "block-body--threadmarkBody") {
-			return true
-		}
+func extractAnnotation(d *document.Document) (annotation string) {
+	nodes := d.GetNodesByClass("bbWrapper")
+	if len(nodes) == 0 {
+		fmt.Println("unable to locate annotation container node")
+		return
 	}
-	return false
+	annotation = document.FindFirstNonSpaceText(nodes[0])
+	return
 }
 
-func isThreadmarkItem(attrs []html.Attribute) bool {
-	for _, attr := range attrs {
-		if attr.Key == "class" && strings.Contains(attr.Val, "structItem--threadmark") {
-			return true
-		}
+func extractAuthor(d *document.Document) (author string) {
+	nodes := d.GetNodesByClass("username")
+	if len(nodes) == 0 {
+		fmt.Println("unable to locate author username node")
+		return
 	}
-	return false
+	author = document.FindFirstNonSpaceText(nodes[0])
+	return
 }
 
-func isThreadmarkTitle(attrs []html.Attribute) bool {
-	for _, attr := range attrs {
-		if attr.Key == "class" && strings.Contains(attr.Val, "structItem-title") {
-			return true
-		}
+func extractFicName(d *document.Document) (name string) {
+	nodes := d.GetNodesByClass("threadmarkListingHeader-name")
+	if len(nodes) == 0 {
+		fmt.Println("unable to locate name node")
+		return
+	} else if len(nodes) > 1 {
+		fmt.Println("located several potential name nodes")
 	}
-	return false
+	name = document.FindFirstNonSpaceText(nodes[0])
+	return
 }
 
-func extractDatetime(attrs []html.Attribute) (t time.Time) {
-	for _, attr := range attrs {
-		if attr.Key == "datetime" {
-			t, _ = time.Parse("2006-01-02T15:04:05-0700", attr.Val)
-			return
-		}
+func extractCreatedTime(d *document.Document) (t time.Time) {
+	nodes := d.GetNodesByClass("threadmarkListingHeader-stats")
+	if len(nodes) == 0 {
+		fmt.Println("unable to locate stats node")
+		return
+	} else if len(nodes) > 1 {
+		fmt.Println("located several potential stats nodes")
+	}
+	datetimes := document.FindAttributeValues(nodes[0], "datetime")
+	if len(datetimes) == 0 {
+		fmt.Println("unable to locate creation time node")
+		return
+	} else if len(datetimes) > 1 {
+		fmt.Println("located several potential creation time nodes")
+	}
+	t, err := time.Parse("2006-01-02T15:04:05-0700", datetimes[0])
+	if err != nil {
+		fmt.Printf("unable to parse fic creation time [ %s ]: %v\n", datetimes[0], err)
 	}
 	return
 }

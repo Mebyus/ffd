@@ -6,12 +6,12 @@ import (
 	"github.com/mebyus/ffd/track/fic"
 )
 
-func Check(target string) (c []fic.Chapter, err error) {
+func Check(target string) (f *fic.Info, err error) {
 	t, err := ChooseByTarget(target)
 	if err != nil {
 		err = fmt.Errorf("choosing tool for %s: %v", target, err)
 		return
 	}
-	c = t.Check(target)
+	f = t.Check(target)
 	return
 }

@@ -14,7 +14,7 @@ import (
 
 type tools interface {
 	Download(target string, saveSource bool)
-	Check(target string) []fic.Chapter
+	Check(target string) *fic.Info
 	Parse(src io.Reader, dst io.Writer) error
 }
 
