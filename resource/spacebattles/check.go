@@ -110,7 +110,7 @@ func extractAnnotation(d *document.Document) (annotation string) {
 		fmt.Println("unable to locate annotation container node")
 		return
 	}
-	annotation = document.FindFirstNonSpaceText(nodes[0])
+	annotation = strings.Join(document.FindNonSpaceTexts(nodes[0]), " ")
 	return
 }
 
