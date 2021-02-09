@@ -2,7 +2,6 @@ package track
 
 import (
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/mebyus/ffd/resource"
@@ -10,7 +9,7 @@ import (
 )
 
 func Add(target, trackpath string) (err error) {
-	_, err = url.Parse(target)
+	location, err := resource.GetLocationForTarget(target)
 	if err != nil {
 		return
 	}
@@ -29,6 +28,7 @@ func Add(target, trackpath string) (err error) {
 	}
 	fics = append(fics, fic.Info{
 		BaseURL:  target,
+		Location: location,
 		Chapters: chapters,
 		Words:    fic.CountWords(chapters),
 		Check: fic.Check{

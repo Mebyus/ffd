@@ -18,6 +18,36 @@ type tools interface {
 	Parse(src io.Reader, dst io.Writer) error
 }
 
+func GetLocationForTarget(target string) (location fic.Location, err error) {
+	u, err := url.Parse(target)
+	if err != nil {
+		return
+	}
+	hostname := u.Hostname()
+	location, err = GetLocationForHostname(hostname)
+	return
+}
+
+func GetLocationForHostname(hostname string) (location fic.Location, err error) {
+	switch hostname {
+	case spacebattles.Hostname:
+		location = fic.SpaceBattles
+	case "forums.sufficientvelocity.com":
+		location = fic.SufficientVelocity
+	case "forum.questionablequesting.com":
+		location = fic.QuestionableQuesting
+	case "www.fanfiction.net":
+		location = fic.FanFiction
+	case "archiveofourown.org":
+		location = fic.ArchiveOfOurOwn
+	case royalroad.Hostname:
+		location = fic.RoyalRoad
+	default:
+		err = unknown(hostname)
+	}
+	return
+}
+
 func ChooseByTarget(target string) (t tools, err error) {
 	u, err := url.Parse(target)
 	if err != nil {

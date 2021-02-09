@@ -16,6 +16,7 @@ func help(command *cli.Command) (err error) {
 	download
 	list
 	parse
-	suppress`)
+	suppress
+	tidy`)
 	return
 }
