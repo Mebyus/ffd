@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/mebyus/ffd/cmn"
+	"github.com/mebyus/ffd/setting"
 )
 
 func Parse(dirpath, resourceID string, separate bool) (err error) {
@@ -41,11 +42,11 @@ func Parse(dirpath, resourceID string, separate bool) (err error) {
 }
 
 func parseTogether(name, dirpath string, tool tools, dirnames []string) (err error) {
-	err = os.MkdirAll("out", 0766)
+	err = os.MkdirAll(setting.OutDir, 0766)
 	if err != nil {
 		return
 	}
-	outpath := filepath.Join("out", name+".txt")
+	outpath := filepath.Join(setting.OutDir, name+".txt")
 	outfile, err := os.Create(outpath)
 	if err != nil {
 		return err
@@ -72,7 +73,7 @@ func parseTogether(name, dirpath string, tool tools, dirnames []string) (err err
 }
 
 func parseSeparate(name, dirpath string, tool tools, dirnames []string) (err error) {
-	outdirpath := filepath.Join("out", name)
+	outdirpath := filepath.Join(setting.OutDir, name)
 	err = os.MkdirAll(outdirpath, 0766)
 	if err != nil {
 		return
