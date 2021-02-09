@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/mebyus/ffd/cmn"
@@ -122,7 +121,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 	}
 	fmt.Printf("First page parsed. Fic contains %d pages total\n", pages)
 
-	filenames := sourceFilenames(pages)
+	filenames := cmn.GenerateFilenames(pages, "html")
 	for i := int64(2); i <= pages; i++ {
 		fmt.Printf("Downloading page %3d / %d", i, pages)
 		start = time.Now()
@@ -160,21 +159,6 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 	}
 	fmt.Printf("Parsing %d pages took: %v (%v per page)\n", pages, parsingDuration,
 		parsingDuration/time.Duration(pages))
-	return
-}
-
-func sourceFilenames(maxIndex int64) (filenames []string) {
-	maxIndexStr := fmt.Sprintf("%d", maxIndex)
-	for i := int64(1); i <= maxIndex; i++ {
-		indexStr := fmt.Sprintf("%d", i)
-		formatStr := ""
-		if len(maxIndexStr)-len(indexStr) > 0 {
-			formatStr = strings.Repeat("0", len(maxIndexStr)-len(indexStr)) + "%d.html"
-		} else {
-			formatStr = "%d.html"
-		}
-		filenames = append(filenames, fmt.Sprintf(formatStr, i))
-	}
 	return
 }
 

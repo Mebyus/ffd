@@ -1,36 +1,48 @@
 package royalroad
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
+	"github.com/mebyus/ffd/cmn"
+	"github.com/mebyus/ffd/document"
 	"golang.org/x/net/html"
 )
 
-const baseurl = "https://www.royalroad.com"
+const rootURL = "https://www.royalroad.com"
 
-func geturls(tocurl string, client *http.Client) (urls []string, err error) {
-	request, err := http.NewRequest("GET", tocurl, bytes.NewReader([]byte{}))
+func getChapterURLs(indexPageURL string, client *http.Client) (urls []string, err error) {
+	fmt.Printf("Downloading index page...")
+	start := time.Now()
+	indexPage, err := cmn.GetBody(indexPageURL, client)
 	if err != nil {
-		err = fmt.Errorf("Composing table of contents request: %v", err)
+		fmt.Println()
 		return
 	}
-	response, err := client.Do(request)
+	fmt.Printf(" [ OK ] %v\n", time.Since(start))
+	defer cmn.SmartClose(indexPage)
+
+	fmt.Printf("Parsing index page...\n")
+	urls, err = parseIndex(indexPage)
 	if err != nil {
-		err = fmt.Errorf("Doing table of contents request: %v", err)
 		return
 	}
-	if response.StatusCode != http.StatusOK {
-		err = fmt.Errorf("Table of contents response: %s", response.Status)
+	for i := range urls {
+		urls[i] = rootURL + urls[i]
+	}
+	fmt.Printf("Index page parsed. Fic contains %d chapters total\n", len(urls))
+	return
+}
+
+func parseIndex(source io.Reader) (hrefs []string, err error) {
+	n, err := html.Parse(source)
+	if err != nil {
 		return
 	}
-	urls = parseTableOfContents(response.Body)
-	closeErr := response.Body.Close()
-	if closeErr != nil {
-		fmt.Printf("Closing table of contents response body: %v\n", closeErr)
-	}
+	d := document.FromNode(n)
+	hrefs = document.FindAttributeValues(d.GetNodeById("chapters"), "href")
 	return
 }
 
@@ -58,7 +70,7 @@ func parseTableOfContents(page io.Reader) []string {
 			} else if tableFound && token.Data == "a" {
 				href := extracthref(token.Attr)
 				if href != "" {
-					hrefs = append(hrefs, baseurl+href)
+					hrefs = append(hrefs, rootURL+href)
 				}
 			}
 			depth++

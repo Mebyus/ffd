@@ -53,6 +53,36 @@ func FindNonSpaceTexts(root *html.Node) (texts []string) {
 	return
 }
 
+func FindAttributeValues(root *html.Node, key string) (values []string) {
+	if root == nil {
+		return
+	}
+	tip := root.FirstChild
+
+	asc := false
+	for tip != root && tip != nil {
+		if !asc {
+			for _, attr := range tip.Attr {
+				if attr.Key == key {
+					values = append(values, attr.Val)
+				}
+			}
+		}
+
+		if !asc && tip.FirstChild != nil {
+			tip = tip.FirstChild
+			asc = false
+		} else if tip.NextSibling != nil {
+			tip = tip.NextSibling
+			asc = false
+		} else {
+			tip = tip.Parent
+			asc = true
+		}
+	}
+	return
+}
+
 func Find(root *html.Node, check func(n *html.Node) bool) (nodes []*html.Node) {
 	if root == nil {
 		return
@@ -60,8 +90,8 @@ func Find(root *html.Node, check func(n *html.Node) bool) (nodes []*html.Node) {
 	tip := root.FirstChild
 
 	asc := false
-	for tip != nil {
-		if check(tip) {
+	for tip != root && tip != nil {
+		if !asc && check(tip) {
 			nodes = append(nodes, tip)
 		}
 
@@ -86,8 +116,8 @@ func FindFirst(root *html.Node, check func(n *html.Node) bool) (node *html.Node)
 	tip := root.FirstChild
 
 	asc := false
-	for tip != nil {
-		if check(tip) {
+	for tip != root && tip != nil {
+		if !asc && check(tip) {
 			return tip
 		}
 
@@ -112,8 +142,8 @@ func FindLast(root *html.Node, check func(n *html.Node) bool) (node *html.Node) 
 	tip := root.LastChild
 
 	asc := false
-	for tip != nil {
-		if check(tip) {
+	for tip != root && tip != nil {
+		if !asc && check(tip) {
 			return tip
 		}
 
@@ -139,7 +169,9 @@ func Walk(root *html.Node, action func(n *html.Node)) {
 
 	asc := false
 	for tip != root && tip != nil {
-		action(tip)
+		if !asc {
+			action(tip)
+		}
 
 		if !asc && tip.FirstChild != nil {
 			tip = tip.FirstChild

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 func SmartClose(c io.Closer) {
@@ -31,5 +32,20 @@ func GetBody(url string, client *http.Client) (body io.ReadCloser, err error) {
 		return
 	}
 	body = response.Body
+	return
+}
+
+func GenerateFilenames(maxIndex int64, ext string) (filenames []string) {
+	maxIndexStr := fmt.Sprintf("%d", maxIndex)
+	for i := int64(1); i <= maxIndex; i++ {
+		indexStr := fmt.Sprintf("%d", i)
+		formatStr := ""
+		if len(maxIndexStr)-len(indexStr) > 0 {
+			formatStr = strings.Repeat("0", len(maxIndexStr)-len(indexStr)) + "%d.%s"
+		} else {
+			formatStr = "%d.%s"
+		}
+		filenames = append(filenames, fmt.Sprintf(formatStr, i, ext))
+	}
 	return
 }
