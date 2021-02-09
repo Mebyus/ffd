@@ -3,6 +3,8 @@ package resource
 import (
 	"fmt"
 	"io"
+	"net/url"
+	"strings"
 
 	"github.com/mebyus/ffd/resource/fanfiction"
 	"github.com/mebyus/ffd/resource/royalroad"
@@ -16,7 +18,28 @@ type tools interface {
 	Parse(src io.Reader, dst io.Writer) error
 }
 
-func Choose(hostname string) (t tools, err error) {
+func ChooseByTarget(target string) (t tools, err error) {
+	u, err := url.Parse(target)
+	if err != nil {
+		return
+	}
+	hostname := u.Hostname()
+	t, err = ChooseByHostname(hostname)
+	return
+}
+
+func ChooseByID(resourceID string) (t tools, err error) {
+	if len(resourceID) > 3 {
+		// resource id is a hostname
+		t, err = ChooseByHostname(resourceID)
+	} else {
+		// resource id is a location
+		t, err = ChooseByLocation(resourceID)
+	}
+	return
+}
+
+func ChooseByHostname(hostname string) (t tools, err error) {
 	switch hostname {
 	case spacebattles.Hostname:
 		t = spacebattles.NewTools()
@@ -31,11 +54,36 @@ func Choose(hostname string) (t tools, err error) {
 	case royalroad.Hostname:
 		t = royalroad.NewTools()
 	default:
-		err = notImplemented(hostname)
+		err = unknown(hostname)
 	}
 	return
 }
 
-func notImplemented(hostname string) error {
-	return fmt.Errorf("resource ( %s ) not implemented", hostname)
+func ChooseByLocation(location string) (t tools, err error) {
+	loc := strings.ToUpper(location)
+	switch fic.Location(loc) {
+	case fic.SpaceBattles:
+		t = spacebattles.NewTools()
+	case fic.SufficientVelocity:
+		t = spacebattles.NewTools()
+	case fic.QuestionableQuesting:
+		err = notImplemented(loc)
+	case fic.FanFiction:
+		t = fanfiction.NewTools()
+	case fic.ArchiveOfOurOwn:
+		err = notImplemented(loc)
+	case fic.RoyalRoad:
+		t = royalroad.NewTools()
+	default:
+		err = unknown(loc)
+	}
+	return
+}
+
+func notImplemented(resourceID string) error {
+	return fmt.Errorf("resource [ %s ] not implemented", resourceID)
+}
+
+func unknown(resourceID string) error {
+	return fmt.Errorf("unknown resource [ %s ]", resourceID)
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/mebyus/ffd/cmn"
 )
 
-func Parse(dirpath, hostname string, separate bool) (err error) {
+func Parse(dirpath, resourceID string, separate bool) (err error) {
 	dir, err := os.Open(dirpath)
 	if err != nil {
 		return
@@ -27,19 +27,20 @@ func Parse(dirpath, hostname string, separate bool) (err error) {
 	if err != nil {
 		return
 	}
+	tool, err := ChooseByID(resourceID)
+	if err != nil {
+		err = fmt.Errorf("choosing tool for %s: %v", resourceID, err)
+		return
+	}
 	if separate {
-		err = parseSeparate(dirstat.Name(), dirpath, hostname, dirnames)
+		err = parseSeparate(dirstat.Name(), dirpath, tool, dirnames)
 	} else {
-		err = parseTogether(dirstat.Name(), dirpath, hostname, dirnames)
+		err = parseTogether(dirstat.Name(), dirpath, tool, dirnames)
 	}
 	return
 }
 
-func parseTogether(name, dirpath, hostname string, dirnames []string) (err error) {
-	t, err := Choose(hostname)
-	if err != nil {
-		return
-	}
+func parseTogether(name, dirpath string, tool tools, dirnames []string) (err error) {
 	err = os.MkdirAll("out", 0766)
 	if err != nil {
 		return
@@ -61,7 +62,7 @@ func parseTogether(name, dirpath, hostname string, dirnames []string) (err error
 			return err
 		}
 		if !fstat.IsDir() {
-			err := t.Parse(file, outfile)
+			err := tool.Parse(file, outfile)
 			if err != nil {
 				return err
 			}
@@ -70,11 +71,7 @@ func parseTogether(name, dirpath, hostname string, dirnames []string) (err error
 	return
 }
 
-func parseSeparate(name, dirpath, hostname string, dirnames []string) (err error) {
-	t, err := Choose(hostname)
-	if err != nil {
-		return
-	}
+func parseSeparate(name, dirpath string, tool tools, dirnames []string) (err error) {
 	outdirpath := filepath.Join("out", name)
 	err = os.MkdirAll(outdirpath, 0766)
 	if err != nil {
@@ -98,7 +95,7 @@ func parseSeparate(name, dirpath, hostname string, dirnames []string) (err error
 				return err
 			}
 			defer cmn.SmartClose(outfile)
-			parseErr := t.Parse(file, outfile)
+			parseErr := tool.Parse(file, outfile)
 			if parseErr != nil {
 				fmt.Println(parseErr)
 			}
