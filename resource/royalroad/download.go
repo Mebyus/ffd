@@ -10,12 +10,10 @@ import (
 
 	"github.com/mebyus/ffd/cmn"
 	"github.com/mebyus/ffd/planner"
+	"github.com/mebyus/ffd/setting"
 )
 
-const timeout = 15.0 * time.Second
 const Hostname = "www.royalroad.com"
-const sourcedir = "source"
-const outdir = "out"
 const pause = time.Second
 
 func (t *rrTools) Download(target string, saveSource bool) {
@@ -44,11 +42,11 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 		return
 	}
 
-	err = os.MkdirAll(outdir, 0774)
+	err = os.MkdirAll(setting.OutDir, 0774)
 	if err != nil {
 		return
 	}
-	outpath := filepath.Join(outdir, name+".txt")
+	outpath := filepath.Join(setting.OutDir, name+".txt")
 	outfile, err := os.Create(outpath)
 	if err != nil {
 		return
@@ -56,7 +54,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 	defer cmn.SmartClose(outfile)
 	fmt.Printf("Output file: %s\n", outpath)
 
-	savedir := filepath.Join(sourcedir, name)
+	savedir := filepath.Join(setting.SourceSaveDir, name)
 	if saveSource {
 		err = os.MkdirAll(savedir, 0774)
 		if err != nil {

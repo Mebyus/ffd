@@ -10,13 +10,10 @@ import (
 
 	"github.com/mebyus/ffd/cmn"
 	"github.com/mebyus/ffd/planner"
+	"github.com/mebyus/ffd/setting"
 )
 
 const Hostname = "forums.spacebattles.com"
-
-const timeout = 15 * time.Second
-const outdir = "out"
-const sourcedir = "source"
 
 func (t *sbTools) Download(target string, saveSource bool) {
 	fmt.Printf("Analyzing URL\n")
@@ -77,11 +74,11 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 	fmt.Printf(" [ OK ] %v\n", time.Since(start))
 	defer cmn.SmartClose(firstPage)
 
-	err = os.MkdirAll(outdir, 0774)
+	err = os.MkdirAll(setting.OutDir, 0774)
 	if err != nil {
 		return
 	}
-	outpath := filepath.Join(outdir, name+".txt")
+	outpath := filepath.Join(setting.OutDir, name+".txt")
 	outfile, err := os.Create(outpath)
 	if err != nil {
 		return
@@ -90,7 +87,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 	fmt.Printf("Output file: %s\n", outpath)
 
 	var teeFirstPage io.Reader
-	savedir := filepath.Join(sourcedir, name)
+	savedir := filepath.Join(setting.SourceSaveDir, name)
 	if saveSource {
 		err = os.MkdirAll(savedir, 0774)
 		if err != nil {

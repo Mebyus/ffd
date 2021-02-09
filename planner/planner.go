@@ -7,9 +7,8 @@ import (
 	"time"
 
 	"github.com/mebyus/ffd/cmn"
+	"github.com/mebyus/ffd/setting"
 )
-
-const Timeout = 15 * time.Second
 
 type pool struct {
 	max int
@@ -31,7 +30,7 @@ type Task struct {
 var (
 	Tasks  = make(chan *Task, 10)
 	Client = &http.Client{
-		Timeout: Timeout,
+		Timeout: setting.ClientTimeout,
 	}
 )
 

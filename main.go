@@ -6,6 +6,7 @@ import (
 
 	"github.com/mebyus/ffd/cli"
 	"github.com/mebyus/ffd/planner"
+	"github.com/mebyus/ffd/setting"
 )
 
 func unknown(command *cli.Command) (err error) {
@@ -36,6 +37,8 @@ func main() {
 	default:
 		executor = unknown
 	}
+
+	setting.Load()
 	go planner.Planner()
 	err := executor(command)
 	if err != nil {

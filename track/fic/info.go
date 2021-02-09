@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/mebyus/ffd/setting"
 )
 
 type Chapter struct {
@@ -95,7 +97,7 @@ func Load(path string) (fics []Info, originpath string, err error) {
 	}
 	if err != nil || execdir == wdpath {
 		err = nil
-		originpath = filepath.Join(execdir, "track.json")
+		originpath = filepath.Join(execdir, setting.TrackPath)
 		b, err = ioutil.ReadFile(originpath)
 		if err != nil {
 			if !os.IsNotExist(err) {
@@ -117,7 +119,7 @@ func Load(path string) (fics []Info, originpath string, err error) {
 		}
 		return
 	}
-	originpath = filepath.Join(execdir, "track.json")
+	originpath = filepath.Join(execdir, setting.TrackPath)
 	b, err = ioutil.ReadFile(originpath)
 	if err == nil {
 		fics = make([]Info, 0)
@@ -136,7 +138,7 @@ func Load(path string) (fics []Info, originpath string, err error) {
 		originpath = ""
 		return
 	}
-	originpath = filepath.Join(wdpath, "track.json")
+	originpath = filepath.Join(wdpath, setting.TrackPath)
 	b, err = ioutil.ReadFile(originpath)
 	if err == nil {
 		fics = make([]Info, 0)
@@ -156,7 +158,7 @@ func Load(path string) (fics []Info, originpath string, err error) {
 		return
 	}
 	err = nil
-	originpath = filepath.Join(execdir, "track.json")
+	originpath = filepath.Join(execdir, setting.TrackPath)
 	fics = make([]Info, 0)
 	fmt.Printf("track file doesn't exist, fic list is treated as empty\n")
 	return
