@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -29,10 +31,17 @@ type settings struct {
 }
 
 func load() (s settings, useDefaults bool, err error) {
-	b, err := ioutil.ReadFile(defConfigPath)
+	execpath, err := os.Executable()
+	if err != nil {
+		err = fmt.Errorf("cannot locate executable: %v", err)
+		useDefaults = true
+		return
+	}
+	execdir := filepath.Dir(execpath)
+	b, err := ioutil.ReadFile(filepath.Join(defConfigPath))
 	if err != nil {
 		fmt.Printf("couldn't read config file: %v\n", err)
-		err = saveDefault()
+		err = saveDefault(execdir)
 		useDefaults = true
 		return
 	}
@@ -78,7 +87,7 @@ func Load() {
 	}
 }
 
-func saveDefault() (err error) {
+func saveDefault(dirpath string) (err error) {
 	fmt.Printf("creating new config file [ %s ]\n", defConfigPath)
 	s := settings{
 		OutDir:        defOutDir,
@@ -89,7 +98,7 @@ func saveDefault() (err error) {
 	if err != nil {
 		return
 	}
-	err = ioutil.WriteFile(defConfigPath, b, 0664)
+	err = ioutil.WriteFile(filepath.Join(dirpath, defConfigPath), b, 0664)
 	if err != nil {
 		return
 	}
