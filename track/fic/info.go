@@ -68,6 +68,19 @@ func Save(path string, fics []Info) (err error) {
 	return
 }
 
+func Get(n int) (f *Info, err error) {
+	fics, _, err := Load("")
+	if err != nil {
+		return
+	}
+	if n < 1 || n > len(fics) {
+		err = fmt.Errorf("fic number = %d exceeds boundaries [%d, %d]", n, 1, len(fics))
+		return
+	}
+	f = &fics[n-1]
+	return
+}
+
 func Load(path string) (fics []Info, originpath string, err error) {
 	var b []byte
 	if path != "" {
