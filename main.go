@@ -26,6 +26,8 @@ func main() {
 		executor = help
 	case "add":
 		executor = add
+	case "remove":
+		executor = remove
 	case "check":
 		executor = check
 	case "suppress":

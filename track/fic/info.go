@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/mebyus/ffd/setting"
@@ -161,6 +162,27 @@ func Load(path string) (fics []Info, originpath string, err error) {
 	originpath = filepath.Join(execdir, setting.TrackPath)
 	fics = make([]Info, 0)
 	fmt.Printf("track file doesn't exist, fic list is treated as empty\n")
+	return
+}
+
+func Sort(fics []Info) {
+	sort.Slice(fics, func(i, j int) bool {
+		return fics[i].BaseURL < fics[j].BaseURL
+	})
+}
+
+func Remove(fics *[]Info, n int) (err error) {
+	if n < 1 || n > len(*fics) {
+		err = fmt.Errorf("fic number = %d exceeds boundaries [%d, %d]", n, 1, len(*fics))
+		return
+	}
+	if len(*fics) == 1 {
+		fics = &[]Info{}
+	} else {
+		(*fics)[n-1] = (*fics)[len(*fics)-1]
+		*fics = (*fics)[:len(*fics)-1]
+		Sort(*fics)
+	}
 	return
 }
 

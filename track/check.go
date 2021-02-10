@@ -15,7 +15,7 @@ func Check(trackpath string) (err error) {
 	}
 	updatedMessages := make([]string, 0)
 	for i := range fics {
-		if fics[i].Check.Suppressed {
+		if fics[i].Check.Suppressed || fics[i].Finished {
 			continue
 		}
 		fmt.Printf("Checking [ %s ]\n", fics[i].BaseURL)

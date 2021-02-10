@@ -87,7 +87,7 @@ func extractAuthor(d *document.Document) (author string) {
 		fmt.Println("unable to locate author username node")
 		return
 	}
-	author = document.FindFirstNonSpaceText(nodes[0])
+	author = document.FindLastNonSpaceText(nodes[0])
 	return
 }
 
