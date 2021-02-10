@@ -54,6 +54,32 @@ func FindNonSpaceTexts(root *html.Node) (texts []string) {
 }
 
 func FindAttributeValues(root *html.Node, key string) (values []string) {
+	extract := func(n *html.Node) (value string, add bool) {
+		for _, attr := range n.Attr {
+			if attr.Key == key {
+				return attr.Val, true
+			}
+		}
+		return
+	}
+	return FindValues(root, extract)
+}
+
+func FindTagAttributeValues(root *html.Node, tag, key string) (values []string) {
+	extract := func(n *html.Node) (value string, add bool) {
+		if n.Type == html.ElementNode && n.Data == tag {
+			for _, attr := range n.Attr {
+				if attr.Key == key {
+					return attr.Val, true
+				}
+			}
+		}
+		return
+	}
+	return FindValues(root, extract)
+}
+
+func FindValues(root *html.Node, extract func(n *html.Node) (value string, add bool)) (values []string) {
 	if root == nil {
 		return
 	}
@@ -62,10 +88,9 @@ func FindAttributeValues(root *html.Node, key string) (values []string) {
 	asc := false
 	for tip != root && tip != nil {
 		if !asc {
-			for _, attr := range tip.Attr {
-				if attr.Key == key {
-					values = append(values, attr.Val)
-				}
+			value, add := extract(tip)
+			if add {
+				values = append(values, value)
 			}
 		}
 

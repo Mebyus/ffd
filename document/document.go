@@ -42,6 +42,16 @@ func (d *Document) GetNodesByTag(tag string) []*html.Node {
 	return d.tm[tag]
 }
 
+func (d *Document) GetNodesByTagClass(tag string, class string) (nodes []*html.Node) {
+	tagNodes := d.tm[tag]
+	for _, n := range tagNodes {
+		if HasClass(n, class) {
+			nodes = append(nodes, n)
+		}
+	}
+	return
+}
+
 func (d *Document) traverse() {
 	asc := false
 	tip := d.Root
