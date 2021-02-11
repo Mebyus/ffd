@@ -12,7 +12,11 @@ func List(trackpath string) (err error) {
 		return
 	}
 	for i := range fics {
-		fmt.Printf("%3d) %3s  %15s  %4dk [ %s ]\n", i+1, fics[i].Location, fics[i].Name, fics[i].Words/1000,
+		shortName := fics[i].Name
+		if len(shortName) > 20 {
+			shortName = shortName[:20]
+		}
+		fmt.Printf("%3d) %3s -- %20s -- %4dk [ %s ]\n", i+1, fics[i].Location, shortName, fics[i].Words/1000,
 			fics[i].Updated.Format("02.01.2006"))
 	}
 	return
