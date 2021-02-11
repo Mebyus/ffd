@@ -7,7 +7,7 @@ import (
 
 func check(command *cli.Command) error {
 	trackpath := command.Flags["track"]
-	err := track.Check(trackpath)
+	err := track.Check(trackpath, command.Target)
 	if err != nil {
 		return err
 	}
