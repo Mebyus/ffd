@@ -8,19 +8,25 @@ import (
 	"github.com/mebyus/ffd/track/fic"
 )
 
-func Tidy(trackpath string) (err error) {
+func Tidy(trackpath string, cleanChapters, cleanUpdates bool) (err error) {
 	oldfics, originpath, err := fic.Load(trackpath)
 	if err != nil {
 		return
 	}
 	newfics := make([]fic.Info, 0)
-	for _, fic := range oldfics {
-		location, err := resource.GetLocationForTarget(fic.BaseURL)
+	for _, f := range oldfics {
+		if cleanChapters {
+			f.Chapters = nil
+		}
+		if cleanUpdates {
+			f.Check = fic.Check{}
+		}
+		location, err := resource.GetLocationForTarget(f.BaseURL)
 		if err != nil {
-			fmt.Printf("removed [ %s ]: %v\n", fic.BaseURL, err)
+			fmt.Printf("removed [ %s ]: %v\n", f.BaseURL, err)
 		} else {
-			fic.Location = location
-			newfics = append(newfics, fic)
+			f.Location = location
+			newfics = append(newfics, f)
 		}
 	}
 	sort.Slice(newfics, func(i, j int) bool {

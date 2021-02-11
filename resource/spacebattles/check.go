@@ -87,7 +87,7 @@ func extractThreadmarkList(d *document.Document) (list []fic.Chapter) {
 		} else if len(row) == 5 {
 			row = row[1:]
 		}
-
+		link := document.FindFirstByTag(node, "a")
 		created, err := time.Parse("2006-01-02T15:04:05-0700", datetimes[j])
 		if err != nil {
 			fmt.Printf("unable to parse chapter creation time [ %s ]: %v\n", datetimes[j], err)
@@ -95,12 +95,26 @@ func extractThreadmarkList(d *document.Document) (list []fic.Chapter) {
 		name := row[0]
 		words := convertWordCount(row[2])
 		list = append(list, fic.Chapter{
+			ID:      exctractChapterID(link),
 			Name:    name,
 			Words:   words,
 			Created: created,
 		})
 		j++
 	}
+	return
+}
+
+func exctractChapterID(n *html.Node) (id string) {
+	val := document.GetAttributeValue(n, "href")
+	if val == "" {
+		return
+	}
+	split := strings.Split(val, "#")
+	if len(split) != 2 {
+		return
+	}
+	id = strings.TrimPrefix(split[1], "post-")
 	return
 }
 

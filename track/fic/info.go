@@ -13,6 +13,7 @@ import (
 )
 
 type Chapter struct {
+	ID      string
 	Name    string
 	Created time.Time
 	Words   int64
@@ -202,14 +203,16 @@ func Remove(fics *[]Info, n int) (err error) {
 func Compare(o, n []Chapter) (diff []Chapter) {
 	m := make(map[string]Chapter)
 	for _, oc := range o {
-		m[oc.Name] = oc
+		if oc.ID != "" {
+			m[oc.ID] = oc
+		}
 	}
 	for _, nc := range n {
-		ec, exists := m[nc.Name]
-		if !exists {
-			diff = append(diff, nc)
-		} else if ec.Words != nc.Words {
-			diff = append(diff, nc)
+		if nc.ID != "" {
+			_, exists := m[nc.ID]
+			if !exists {
+				diff = append(diff, nc)
+			}
 		}
 	}
 	return

@@ -99,6 +99,18 @@ func HasClass(node *html.Node, class string) bool {
 	return false
 }
 
+func GetAttributeValue(node *html.Node, key string) (value string) {
+	if node == nil {
+		return
+	}
+	for _, attr := range node.Attr {
+		if attr.Key == key {
+			return attr.Val
+		}
+	}
+	return
+}
+
 func extract(attrs []html.Attribute) (id string, classes []string) {
 	for _, attr := range attrs {
 		switch attr.Key {
