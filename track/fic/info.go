@@ -27,6 +27,7 @@ type Check struct {
 }
 
 type Info struct {
+	ID         string
 	BaseURL    string
 	Location   Location
 	Name       string

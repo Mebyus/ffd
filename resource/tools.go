@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/mebyus/ffd/resource/archiveofourown"
 	"github.com/mebyus/ffd/resource/fanfiction"
 	"github.com/mebyus/ffd/resource/royalroad"
 	"github.com/mebyus/ffd/resource/spacebattles"
@@ -36,9 +37,9 @@ func GetLocationForHostname(hostname string) (location fic.Location, err error) 
 		location = fic.SufficientVelocity
 	case "forum.questionablequesting.com":
 		location = fic.QuestionableQuesting
-	case "www.fanfiction.net":
+	case fanfiction.Hostname:
 		location = fic.FanFiction
-	case "archiveofourown.org":
+	case archiveofourown.Hostname:
 		location = fic.ArchiveOfOurOwn
 	case royalroad.Hostname:
 		location = fic.RoyalRoad
@@ -77,10 +78,10 @@ func ChooseByHostname(hostname string) (t tools, err error) {
 		t = spacebattles.NewTools()
 	case "forum.questionablequesting.com":
 		err = notImplemented(hostname)
-	case "www.fanfiction.net":
+	case fanfiction.Hostname:
 		t = fanfiction.NewTools()
-	case "archiveofourown.org":
-		err = notImplemented(hostname)
+	case archiveofourown.Hostname:
+		t = archiveofourown.NewTools()
 	case royalroad.Hostname:
 		t = royalroad.NewTools()
 	default:
@@ -101,7 +102,7 @@ func ChooseByLocation(location string) (t tools, err error) {
 	case fic.FanFiction:
 		t = fanfiction.NewTools()
 	case fic.ArchiveOfOurOwn:
-		err = notImplemented(loc)
+		t = archiveofourown.NewTools()
 	case fic.RoyalRoad:
 		t = royalroad.NewTools()
 	default:
