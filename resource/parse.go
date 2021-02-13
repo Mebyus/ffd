@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/mebyus/ffd/cmn"
+	"github.com/mebyus/ffd/logs"
 	"github.com/mebyus/ffd/setting"
 )
 
@@ -98,7 +99,7 @@ func parseSeparate(name, dirpath string, tool tools, dirnames []string) (err err
 			defer cmn.SmartClose(outfile)
 			parseErr := tool.Parse(file, outfile)
 			if parseErr != nil {
-				fmt.Println(parseErr)
+				logs.Error.Println(parseErr)
 			}
 		}
 	}

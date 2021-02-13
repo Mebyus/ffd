@@ -1,11 +1,11 @@
 package royalroad
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
 	"github.com/mebyus/ffd/document"
+	"github.com/mebyus/ffd/logs"
 	"golang.org/x/net/html"
 )
 
@@ -25,7 +25,7 @@ func parseChapter(source io.Reader) (result io.Reader, err error) {
 func extractTitle(d *document.Document) (title string) {
 	nodes := d.GetNodesByTag("h1")
 	if len(nodes) == 0 {
-		fmt.Println("unable to locate chapter title node")
+		logs.Warn.Println("unable to locate chapter title node")
 		return
 	}
 	title = document.FindFirstNonSpaceText(nodes[0])
@@ -35,10 +35,10 @@ func extractTitle(d *document.Document) (title string) {
 func extractChapterText(d *document.Document) (text string) {
 	nodes := d.GetNodesByClass("chapter-inner")
 	if len(nodes) == 0 {
-		fmt.Println("unable to locate chapter text container")
+		logs.Warn.Println("unable to locate chapter text container")
 		return
 	} else if len(nodes) > 1 {
-		fmt.Println("located several potential text containers")
+		logs.Warn.Println("located several potential text containers")
 	}
 
 	action := func(n *html.Node) {

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/mebyus/ffd/cmn"
+	"github.com/mebyus/ffd/logs"
 	"github.com/mebyus/ffd/planner"
 	"github.com/mebyus/ffd/setting"
 )
@@ -52,7 +53,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 		return
 	}
 	defer cmn.SmartClose(outfile)
-	fmt.Printf("Output file: %s\n", outpath)
+	logs.Info.Printf("Output file: %s\n", outpath)
 
 	savedir := filepath.Join(setting.SourceSaveDir, name)
 	if saveSource {
@@ -60,7 +61,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 		if err != nil {
 			return
 		}
-		fmt.Printf("Source files will be saved to: %s\n", savedir)
+		logs.Info.Printf("Source files will be saved to: %s\n", savedir)
 	}
 
 	parsingDuration := time.Duration(0)
@@ -71,7 +72,6 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 		start := time.Now()
 		page, err := cmn.GetBody(url, client)
 		if err != nil {
-			fmt.Println()
 			return err
 		}
 		fmt.Printf("  [ OK ] %v\n", time.Since(start))
@@ -104,7 +104,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 		// wait to not spook server DOS (or whatever) protection
 		time.Sleep(pause)
 	}
-	fmt.Printf("Parsing %d pages took: %v (%v per page)\n", pages, parsingDuration,
+	logs.Info.Printf("Parsing %d pages took: %v (%v per page)\n", pages, parsingDuration,
 		parsingDuration/time.Duration(pages))
 	return
 }

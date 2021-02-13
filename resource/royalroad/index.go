@@ -1,13 +1,13 @@
 package royalroad
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/mebyus/ffd/cmn"
 	"github.com/mebyus/ffd/document"
+	"github.com/mebyus/ffd/logs"
 	"github.com/mebyus/ffd/track/fic"
 	"golang.org/x/net/html"
 )
@@ -15,17 +15,16 @@ import (
 const rootURL = "https://www.royalroad.com"
 
 func getChapterURLs(indexPageURL string, client *http.Client) (urls []string, err error) {
-	fmt.Printf("Downloading index page...")
+	logs.Info.Printf("Downloading index page...")
 	start := time.Now()
 	indexPage, err := cmn.GetBody(indexPageURL, client)
 	if err != nil {
-		fmt.Println()
 		return
 	}
-	fmt.Printf(" [ OK ] %v\n", time.Since(start))
+	logs.Info.Printf(" [ OK ] %v\n", time.Since(start))
 	defer cmn.SmartClose(indexPage)
 
-	fmt.Printf("Parsing index page...\n")
+	logs.Info.Printf("Parsing index page...\n")
 	urls, _, err = parseIndex(indexPage)
 	if err != nil {
 		return
@@ -33,7 +32,7 @@ func getChapterURLs(indexPageURL string, client *http.Client) (urls []string, er
 	for i := range urls {
 		urls[i] = rootURL + urls[i]
 	}
-	fmt.Printf("Index page parsed. Fic contains %d chapters total\n", len(urls))
+	logs.Info.Printf("Index page parsed. Fic contains %d chapters total\n", len(urls))
 	return
 }
 
@@ -64,7 +63,7 @@ func parseIndex(source io.Reader) (hrefs []string, f *fic.Info, err error) {
 func extractFicName(d *document.Document) (name string) {
 	nodes := d.GetNodesByTag("h1")
 	if len(nodes) == 0 {
-		fmt.Println("unable to locate fic title node")
+		logs.Warn.Println("unable to locate fic title node")
 		return
 	}
 	name = document.FindFirstNonSpaceText(nodes[0])
@@ -74,7 +73,7 @@ func extractFicName(d *document.Document) (name string) {
 func extractAnnotation(d *document.Document) (annotation string) {
 	nodes := d.GetNodesByClass("description")
 	if len(nodes) == 0 {
-		fmt.Println("unable to locate annotation container node")
+		logs.Warn.Println("unable to locate annotation container node")
 		return
 	}
 	annotation = document.FindFirstNonSpaceText(nodes[0])
@@ -84,7 +83,7 @@ func extractAnnotation(d *document.Document) (annotation string) {
 func extractAuthor(d *document.Document) (author string) {
 	nodes := d.GetNodesByTag("h4")
 	if len(nodes) == 0 {
-		fmt.Println("unable to locate author username node")
+		logs.Warn.Println("unable to locate author username node")
 		return
 	}
 	author = document.FindLastNonSpaceText(nodes[0])
@@ -111,12 +110,12 @@ func exctactChaptersInfo(table *html.Node) (chapters []fic.Chapter) {
 	}
 	datetimes := document.FindTagAttributeValues(tbody, "time", "title")
 	if len(datetimes) != len(chapters) {
-		fmt.Printf("number of timestamps (%d) and chapters (%d) does not match\n", len(datetimes), len(chapters))
+		logs.Warn.Printf("number of timestamps (%d) and chapters (%d) does not match\n", len(datetimes), len(chapters))
 	} else {
 		for i := range chapters {
 			t, err := time.Parse("Monday, January 2, 2006 3:04 PM", datetimes[i])
 			if err != nil {
-				fmt.Printf("unable to parse chapter creation time [ %s ]: %v\n", datetimes[i], err)
+				logs.Warn.Printf("unable to parse chapter creation time [ %s ]: %v\n", datetimes[i], err)
 			} else {
 				chapters[i].Created = t
 			}

@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/mebyus/ffd/logs"
 	"github.com/mebyus/ffd/resource"
 	"github.com/mebyus/ffd/track/fic"
 )
@@ -58,7 +59,7 @@ func checkByNumber(trackpath string, n int) (err error) {
 		return
 	}
 	f := &fics[n-1]
-	fmt.Printf("Checking [ %s ]\n", f.BaseURL)
+	logs.Info.Printf("Checking [ %s ]\n", f.BaseURL)
 	updatedFic, err := resource.Check(f.BaseURL)
 	if err != nil {
 		return err
@@ -85,7 +86,7 @@ func checkAll(trackpath string) (err error) {
 		if fics[i].Check.Suppressed || fics[i].Finished {
 			continue
 		}
-		fmt.Printf("Checking [ %s ]\n", fics[i].BaseURL)
+		logs.Info.Printf("Checking [ %s ]\n", fics[i].BaseURL)
 		updatedFic, err := resource.Check(fics[i].BaseURL)
 		if err != nil {
 			return err

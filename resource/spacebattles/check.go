@@ -1,7 +1,6 @@
 package spacebattles
 
 import (
-	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/mebyus/ffd/cmn"
 	"github.com/mebyus/ffd/document"
+	"github.com/mebyus/ffd/logs"
 	"github.com/mebyus/ffd/planner"
 	"github.com/mebyus/ffd/track/fic"
 	"golang.org/x/net/html"
@@ -17,23 +17,23 @@ import (
 func (t *sbTools) Check(target string) (f *fic.Info) {
 	baseURL, _, err := analyze(target)
 	if err != nil {
-		fmt.Println(err)
+		logs.Error.Println(err)
 		return
 	}
 
-	fmt.Printf("Downloading index page...")
+	logs.Info.Printf("Downloading index page...")
 	start := time.Now()
 	indexPage, err := cmn.GetBody(indexPageURL(baseURL), planner.Client)
 	if err != nil {
-		fmt.Printf("\n%v\n", err)
+		logs.Error.Printf("\n%v\n", err)
 		return
 	}
-	fmt.Printf(" [ OK ] %v\n", time.Since(start))
+	logs.Info.Printf(" [ OK ] %v\n", time.Since(start))
 	defer cmn.SmartClose(indexPage)
 
 	f, err = parseThreadmarksPage(indexPage)
 	if err != nil {
-		fmt.Println(err)
+		logs.Error.Println(err)
 		return
 	}
 	f.BaseURL = baseURL
@@ -65,15 +65,15 @@ func parseThreadmarksPage(source io.Reader) (f *fic.Info, err error) {
 func extractThreadmarkList(d *document.Document) (list []fic.Chapter) {
 	containers := d.GetNodesByClass("structItemContainer")
 	if len(containers) == 0 {
-		fmt.Println("unable to locate list container")
+		logs.Warn.Println("unable to locate list container")
 		return
 	} else if len(containers) > 1 {
-		fmt.Println("located several potential list containers")
+		logs.Warn.Println("located several potential list containers")
 	}
 	datetimes := document.FindAttributeValues(containers[0], "datetime")
 	listItems := d.GetNodesByClass("structItem--threadmark")
 	if len(datetimes) != len(listItems) {
-		fmt.Printf("number of dates (%d) and threadmarks (%d) doesn't match\n", len(datetimes), len(listItems))
+		logs.Warn.Printf("number of dates (%d) and threadmarks (%d) doesn't match\n", len(datetimes), len(listItems))
 	}
 	j := 0
 	for i, node := range listItems {
@@ -82,7 +82,7 @@ func extractThreadmarkList(d *document.Document) (list []fic.Chapter) {
 		}
 		row := document.FindNonSpaceTexts(node)
 		if len(row) != 4 && len(row) != 5 {
-			fmt.Printf("wrong number of elements (%d) in row %d\n", len(row), i+1)
+			logs.Warn.Printf("wrong number of elements (%d) in row %d\n", len(row), i+1)
 			continue
 		} else if len(row) == 5 {
 			row = row[1:]
@@ -90,7 +90,7 @@ func extractThreadmarkList(d *document.Document) (list []fic.Chapter) {
 		link := document.FindFirstByTag(node, "a")
 		created, err := time.Parse("2006-01-02T15:04:05-0700", datetimes[j])
 		if err != nil {
-			fmt.Printf("unable to parse chapter creation time [ %s ]: %v\n", datetimes[j], err)
+			logs.Warn.Printf("unable to parse chapter creation time [ %s ]: %v\n", datetimes[j], err)
 		}
 		name := row[0]
 		words := convertWordCount(row[2])
@@ -121,7 +121,7 @@ func exctractChapterID(n *html.Node) (id string) {
 func extractAnnotation(d *document.Document) (annotation string) {
 	nodes := d.GetNodesByClass("bbWrapper")
 	if len(nodes) == 0 {
-		fmt.Println("unable to locate annotation container node")
+		logs.Warn.Println("unable to locate annotation container node")
 		return
 	}
 	annotation = strings.Join(document.FindNonSpaceTexts(nodes[0]), " ")
@@ -131,7 +131,7 @@ func extractAnnotation(d *document.Document) (annotation string) {
 func extractAuthor(d *document.Document) (author string) {
 	nodes := d.GetNodesByClass("username")
 	if len(nodes) == 0 {
-		fmt.Println("unable to locate author username node")
+		logs.Warn.Println("unable to locate author username node")
 		return
 	}
 	author = document.FindFirstNonSpaceText(nodes[0])
@@ -141,10 +141,10 @@ func extractAuthor(d *document.Document) (author string) {
 func extractFicName(d *document.Document) (name string) {
 	nodes := d.GetNodesByClass("threadmarkListingHeader-name")
 	if len(nodes) == 0 {
-		fmt.Println("unable to locate name node")
+		logs.Warn.Println("unable to locate name node")
 		return
 	} else if len(nodes) > 1 {
-		fmt.Println("located several potential name nodes")
+		logs.Warn.Println("located several potential name nodes")
 	}
 	name = document.FindFirstNonSpaceText(nodes[0])
 	return
@@ -153,21 +153,21 @@ func extractFicName(d *document.Document) (name string) {
 func extractCreatedTime(d *document.Document) (t time.Time) {
 	nodes := d.GetNodesByClass("threadmarkListingHeader-stats")
 	if len(nodes) == 0 {
-		fmt.Println("unable to locate stats node")
+		logs.Warn.Println("unable to locate stats node")
 		return
 	} else if len(nodes) > 1 {
-		fmt.Println("located several potential stats nodes")
+		logs.Warn.Println("located several potential stats nodes")
 	}
 	datetimes := document.FindAttributeValues(nodes[0], "datetime")
 	if len(datetimes) == 0 {
-		fmt.Println("unable to locate creation time node")
+		logs.Warn.Println("unable to locate creation time node")
 		return
 	} else if len(datetimes) > 1 {
-		fmt.Println("located several potential creation time nodes")
+		logs.Warn.Println("located several potential creation time nodes")
 	}
 	t, err := time.Parse("2006-01-02T15:04:05-0700", datetimes[0])
 	if err != nil {
-		fmt.Printf("unable to parse fic creation time [ %s ]: %v\n", datetimes[0], err)
+		logs.Warn.Printf("unable to parse fic creation time [ %s ]: %v\n", datetimes[0], err)
 	}
 	return
 }

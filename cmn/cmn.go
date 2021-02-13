@@ -6,12 +6,14 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/mebyus/ffd/logs"
 )
 
 func SmartClose(c io.Closer) {
 	err := c.Close()
 	if err != nil {
-		fmt.Printf("closing: %v\n", err)
+		logs.Warn.Printf("closing: %v\n", err)
 	}
 	return
 }

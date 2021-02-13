@@ -1,9 +1,9 @@
 package track
 
 import (
-	"fmt"
 	"sort"
 
+	"github.com/mebyus/ffd/logs"
 	"github.com/mebyus/ffd/resource"
 	"github.com/mebyus/ffd/track/fic"
 )
@@ -23,7 +23,7 @@ func Tidy(trackpath string, cleanChapters, cleanUpdates bool) (err error) {
 		}
 		location, err := resource.GetLocationForTarget(f.BaseURL)
 		if err != nil {
-			fmt.Printf("removed [ %s ]: %v\n", f.BaseURL, err)
+			logs.Warn.Printf("removed [ %s ]: %v\n", f.BaseURL, err)
 		} else {
 			f.Location = location
 			newfics = append(newfics, f)

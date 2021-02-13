@@ -9,6 +9,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/mebyus/ffd/logs"
 	"github.com/mebyus/ffd/setting"
 )
 
@@ -109,7 +110,7 @@ func Load(path string) (fics []Info, originpath string, err error) {
 	execdir := filepath.Dir(execpath)
 	wdpath, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("cannot locate working directory: %v\n", err)
+		logs.Error.Printf("cannot locate working directory: %v\n", err)
 	}
 	if err != nil || execdir == wdpath {
 		err = nil
@@ -122,7 +123,7 @@ func Load(path string) (fics []Info, originpath string, err error) {
 				return
 			}
 			fics = make([]Info, 0)
-			fmt.Printf("track file doesn't exist, fic list is treated as empty\n")
+			logs.Warn.Printf("track file doesn't exist, fic list is treated as empty\n")
 			return
 		}
 		fics = make([]Info, 0)
@@ -176,7 +177,7 @@ func Load(path string) (fics []Info, originpath string, err error) {
 	err = nil
 	originpath = filepath.Join(execdir, setting.TrackPath)
 	fics = make([]Info, 0)
-	fmt.Printf("track file doesn't exist, fic list is treated as empty\n")
+	logs.Warn.Printf("track file doesn't exist, fic list is treated as empty\n")
 	return
 }
 

@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/mebyus/ffd/logs"
 )
 
 const (
@@ -40,7 +42,7 @@ func load() (s settings, useDefaults bool, err error) {
 	execdir := filepath.Dir(execpath)
 	b, err := ioutil.ReadFile(filepath.Join(defConfigPath))
 	if err != nil {
-		fmt.Printf("couldn't read config file: %v\n", err)
+		logs.Warn.Printf("couldn't read config file: %v\n", err)
 		err = saveDefault(execdir)
 		useDefaults = true
 		return
@@ -55,7 +57,7 @@ func load() (s settings, useDefaults bool, err error) {
 func Load() {
 	s, useDefaults, err := load()
 	if err != nil {
-		fmt.Println(err)
+		logs.Error.Println(err)
 	}
 	if useDefaults {
 		fmt.Println("All settings have been set to default")
@@ -88,7 +90,7 @@ func Load() {
 }
 
 func saveDefault(dirpath string) (err error) {
-	fmt.Printf("creating new config file [ %s ]\n", defConfigPath)
+	logs.Info.Printf("creating new config file [ %s ]\n", defConfigPath)
 	s := settings{
 		OutDir:        defOutDir,
 		SourceSaveDir: defSourceSaveDir,

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/mebyus/ffd/cli"
+	"github.com/mebyus/ffd/logs"
 	"github.com/mebyus/ffd/planner"
 	"github.com/mebyus/ffd/setting"
 )
@@ -15,6 +16,11 @@ func unknown(command *cli.Command) (err error) {
 
 func main() {
 	command := cli.Parse(os.Args[1:])
+
+	_, verbose := command.Flags["v"]
+	if verbose {
+		logs.Init(logs.I)
+	}
 
 	var executor func(command *cli.Command) error
 	switch command.Name {
@@ -44,7 +50,7 @@ func main() {
 	go planner.Planner()
 	err := executor(command)
 	if err != nil {
-		fmt.Printf("Command execution: %v\n", err)
+		logs.Error.Printf("command execution: %v\n", err)
 		return
 	}
 

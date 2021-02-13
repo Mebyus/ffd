@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/mebyus/ffd/cmn"
+	"github.com/mebyus/ffd/logs"
 	"github.com/mebyus/ffd/planner"
 	"github.com/mebyus/ffd/setting"
 )
@@ -19,7 +20,7 @@ func (t *sbTools) Download(target string, saveSource bool) {
 	fmt.Printf("Analyzing URL\n")
 	baseURL, name, err := analyze(target)
 	if err != nil {
-		fmt.Println(err)
+		logs.Error.Println(err)
 		return
 	}
 	fmt.Printf("URL is correct. Base part: [ %s ]\n", baseURL)
@@ -28,35 +29,11 @@ func (t *sbTools) Download(target string, saveSource bool) {
 	fmt.Printf("Started downloading [ %s ]\n", name)
 	err = downloadSync(baseURL, name, saveSource, planner.Client)
 	if err != nil {
-		fmt.Println(err)
+		logs.Error.Println(err)
 		return
 	}
 	fmt.Printf("Finished downloading [ %s ]\n", name)
 	return
-	// } else {
-	// 	results := make(chan *planner.Result, 10)
-	// 	for _, url := range urls {
-	// 		task := gettask(url, results)
-	// 		planner.Tasks <- task
-	// 	}
-	// 	for _, url := range urls {
-	// 		result := <-results
-	// 		if result.Err != nil {
-	// 			fmt.Printf("Obtaining result from %s: %v\n", url, result.Err)
-	// 			return
-	// 		}
-	// 		contentStr := parseChapter(result.Content)
-	// 		_, err = io.Copy(outfile, strings.NewReader(contentStr))
-	// 		if err != nil {
-	// 			err = fmt.Errorf("Saving chapter to destination: %v", err)
-	// 			return
-	// 		}
-	// 		closeErr := result.Content.Close()
-	// 		if closeErr != nil {
-	// 			fmt.Printf("Closing chapter response body: %v\n", closeErr)
-	// 		}
-	// 	}
-	// }
 }
 
 func downloadAsync(target string, saveSource bool) (err error) {
@@ -64,14 +41,13 @@ func downloadAsync(target string, saveSource bool) (err error) {
 }
 
 func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (err error) {
-	fmt.Printf("Downloading first page...")
+	logs.Info.Printf("Downloading first page...")
 	start := time.Now()
 	firstPage, err := cmn.GetBody(readerPageURL(baseURL, 1), client)
 	if err != nil {
-		fmt.Println()
 		return
 	}
-	fmt.Printf(" [ OK ] %v\n", time.Since(start))
+	logs.Info.Printf(" [ OK ] %v\n", time.Since(start))
 	defer cmn.SmartClose(firstPage)
 
 	err = os.MkdirAll(setting.OutDir, 0774)
@@ -84,7 +60,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 		return
 	}
 	defer cmn.SmartClose(outfile)
-	fmt.Printf("Output file: %s\n", outpath)
+	logs.Info.Printf("Output file: %s\n", outpath)
 
 	var teeFirstPage io.Reader
 	savedir := filepath.Join(setting.SourceSaveDir, name)
@@ -93,7 +69,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 		if err != nil {
 			return
 		}
-		fmt.Printf("Source files will be saved to: %s\n", savedir)
+		logs.Info.Printf("Source files will be saved to: %s\n", savedir)
 		fp := filepath.Join(savedir, "1.html")
 		sourcefile, err := os.Create(fp)
 		if err != nil {
@@ -105,7 +81,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 		teeFirstPage = firstPage
 	}
 
-	fmt.Printf("Parsing first page...\n")
+	logs.Info.Printf("Parsing first page...\n")
 	start = time.Now()
 	parsedFirstPage, pages, err := parsePiece(teeFirstPage)
 	if err != nil {
@@ -116,7 +92,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 	if err != nil {
 		return
 	}
-	fmt.Printf("First page parsed. Fic contains %d pages total\n", pages)
+	logs.Info.Printf("First page parsed. Fic contains %d pages total\n", pages)
 
 	filenames := cmn.GenerateFilenames(pages, "html")
 	for i := int64(2); i <= pages; i++ {
@@ -124,7 +100,6 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 		start = time.Now()
 		page, err := cmn.GetBody(readerPageURL(baseURL, i), client)
 		if err != nil {
-			fmt.Println()
 			return err
 		}
 		fmt.Printf("  [ OK ] %v\n", time.Since(start))
@@ -154,7 +129,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (e
 			return err
 		}
 	}
-	fmt.Printf("Parsing %d pages took: %v (%v per page)\n", pages, parsingDuration,
+	logs.Info.Printf("Parsing %d pages took: %v (%v per page)\n", pages, parsingDuration,
 		parsingDuration/time.Duration(pages))
 	return
 }
