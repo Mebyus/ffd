@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"github.com/mebyus/ffd/document"
-	"github.com/mebyus/ffd/resource/internal"
+	"github.com/mebyus/ffd/resource/fiction"
 	"golang.org/x/net/html"
 )
 
-func (t *ffTools) Parse(src io.Reader) (book *internal.Book, err error) {
+func (t *ffTools) Parse(src io.Reader) (book *fiction.Book, err error) {
 	_, _, err = parsePage(src)
 	if err != nil {
 		err = fmt.Errorf("Parsing piece: %v", err)

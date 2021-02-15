@@ -10,13 +10,13 @@ import (
 
 	"github.com/mebyus/ffd/cmn"
 	"github.com/mebyus/ffd/planner"
-	"github.com/mebyus/ffd/resource/internal"
+	"github.com/mebyus/ffd/resource/fiction"
 	"github.com/mebyus/ffd/setting"
 )
 
 const Hostname = "forums.spacebattles.com"
 
-func (t *sbTools) Download(target string, saveSource bool) (book *internal.Book, err error) {
+func (t *sbTools) Download(target string, saveSource bool) (book *fiction.Book, err error) {
 	fmt.Printf("Analyzing URL\n")
 	baseURL, name, err := analyze(target)
 	if err != nil {
