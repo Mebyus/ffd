@@ -14,7 +14,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-func (t *sbTools) Check(target string) (f *fic.Info) {
+func (t *sbTools) Check(target string) (info *fic.Info, err error) {
 	baseURL, _, err := analyze(target)
 	if err != nil {
 		fmt.Println(err)
@@ -31,13 +31,13 @@ func (t *sbTools) Check(target string) (f *fic.Info) {
 	fmt.Printf(" [ OK ] %v\n", time.Since(start))
 	defer cmn.SmartClose(indexPage)
 
-	f, err = parseThreadmarksPage(indexPage)
+	info, err = parseThreadmarksPage(indexPage)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	f.BaseURL = baseURL
-	f.Location = fic.SpaceBattles
+	info.BaseURL = baseURL
+	info.Location = fic.SpaceBattles
 	return
 }
 

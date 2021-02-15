@@ -9,7 +9,7 @@ import (
 	"github.com/mebyus/ffd/track/fic"
 )
 
-func (t *rrTools) Check(target string) (f *fic.Info) {
+func (t *rrTools) Check(target string) (info *fic.Info, err error) {
 	baseURL, _, err := analyze(target)
 	if err != nil {
 		fmt.Println(err)
@@ -26,12 +26,12 @@ func (t *rrTools) Check(target string) (f *fic.Info) {
 	fmt.Printf(" [ OK ] %v\n", time.Since(start))
 	defer cmn.SmartClose(indexPage)
 
-	_, f, err = parseIndex(indexPage)
+	_, info, err = parseIndex(indexPage)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	f.BaseURL = baseURL
-	f.Location = fic.RoyalRoad
+	info.BaseURL = baseURL
+	info.Location = fic.RoyalRoad
 	return
 }

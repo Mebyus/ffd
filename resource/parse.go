@@ -63,7 +63,11 @@ func parseTogether(name, dirpath string, tool tools, dirnames []string) (err err
 			return err
 		}
 		if !fstat.IsDir() {
-			err := tool.Parse(file, outfile)
+			book, err := tool.Parse(file)
+			if err != nil {
+				return err
+			}
+			err = book.FormatTXT(outfile)
 			if err != nil {
 				return err
 			}
@@ -96,8 +100,13 @@ func parseSeparate(name, dirpath string, tool tools, dirnames []string) (err err
 				return err
 			}
 			defer cmn.SmartClose(outfile)
-			parseErr := tool.Parse(file, outfile)
+			book, parseErr := tool.Parse(file)
 			if parseErr != nil {
+				fmt.Println(parseErr)
+				continue
+			}
+			formatErr := book.FormatTXT(outfile)
+			if formatErr != nil {
 				fmt.Println(parseErr)
 			}
 		}

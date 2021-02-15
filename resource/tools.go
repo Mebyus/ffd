@@ -8,15 +8,16 @@ import (
 
 	"github.com/mebyus/ffd/resource/archiveofourown"
 	"github.com/mebyus/ffd/resource/fanfiction"
+	"github.com/mebyus/ffd/resource/internal"
 	"github.com/mebyus/ffd/resource/royalroad"
 	"github.com/mebyus/ffd/resource/spacebattles"
 	"github.com/mebyus/ffd/track/fic"
 )
 
 type tools interface {
-	Download(target string, saveSource bool)
-	Check(target string) *fic.Info
-	Parse(src io.Reader, dst io.Writer) error
+	Download(target string, saveSource bool) (book *internal.Book, err error)
+	Check(target string) (info *fic.Info, err error)
+	Parse(src io.Reader) (book *internal.Book, err error)
 }
 
 func GetLocationForTarget(target string) (location fic.Location, err error) {

@@ -10,16 +10,16 @@ import (
 
 	"github.com/mebyus/ffd/cmn"
 	"github.com/mebyus/ffd/planner"
+	"github.com/mebyus/ffd/resource/internal"
 	"github.com/mebyus/ffd/setting"
 )
 
 const Hostname = "forums.spacebattles.com"
 
-func (t *sbTools) Download(target string, saveSource bool) {
+func (t *sbTools) Download(target string, saveSource bool) (book *internal.Book, err error) {
 	fmt.Printf("Analyzing URL\n")
 	baseURL, name, err := analyze(target)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	fmt.Printf("URL is correct. Base part: [ %s ]\n", baseURL)
@@ -28,35 +28,10 @@ func (t *sbTools) Download(target string, saveSource bool) {
 	fmt.Printf("Started downloading [ %s ]\n", name)
 	err = downloadSync(baseURL, name, saveSource, planner.Client)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	fmt.Printf("Finished downloading [ %s ]\n", name)
 	return
-	// } else {
-	// 	results := make(chan *planner.Result, 10)
-	// 	for _, url := range urls {
-	// 		task := gettask(url, results)
-	// 		planner.Tasks <- task
-	// 	}
-	// 	for _, url := range urls {
-	// 		result := <-results
-	// 		if result.Err != nil {
-	// 			fmt.Printf("Obtaining result from %s: %v\n", url, result.Err)
-	// 			return
-	// 		}
-	// 		contentStr := parseChapter(result.Content)
-	// 		_, err = io.Copy(outfile, strings.NewReader(contentStr))
-	// 		if err != nil {
-	// 			err = fmt.Errorf("Saving chapter to destination: %v", err)
-	// 			return
-	// 		}
-	// 		closeErr := result.Content.Close()
-	// 		if closeErr != nil {
-	// 			fmt.Printf("Closing chapter response body: %v\n", closeErr)
-	// 		}
-	// 	}
-	// }
 }
 
 func downloadAsync(target string, saveSource bool) (err error) {

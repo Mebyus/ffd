@@ -6,18 +6,14 @@ import (
 	"strings"
 
 	"github.com/mebyus/ffd/document"
+	"github.com/mebyus/ffd/resource/internal"
 	"golang.org/x/net/html"
 )
 
-func (t *ffTools) Parse(src io.Reader, dst io.Writer) (err error) {
-	r, _, err := parsePage(src)
+func (t *ffTools) Parse(src io.Reader) (book *internal.Book, err error) {
+	_, _, err = parsePage(src)
 	if err != nil {
 		err = fmt.Errorf("Parsing piece: %v", err)
-		return
-	}
-	_, err = io.Copy(dst, r)
-	if err != nil {
-		err = fmt.Errorf("Saving piece to destination: %v", err)
 		return
 	}
 	return
