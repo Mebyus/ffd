@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -32,6 +33,16 @@ func GetBody(url string, client *http.Client) (body io.ReadCloser, err error) {
 		return
 	}
 	body = response.Body
+	return
+}
+
+func GetBytes(url string, client *http.Client) (b []byte, err error) {
+	body, err := GetBody(url, client)
+	if err != nil {
+		return
+	}
+	defer SmartClose(body)
+	b, err = ioutil.ReadAll(body)
 	return
 }
 

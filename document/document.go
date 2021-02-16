@@ -111,6 +111,18 @@ func GetAttributeValue(node *html.Node, key string) (value string) {
 	return
 }
 
+func GetChildren(node *html.Node) (nodes []*html.Node) {
+	if node == nil {
+		return
+	}
+	tip := node.FirstChild
+	for tip != nil {
+		nodes = append(nodes, tip)
+		tip = tip.NextSibling
+	}
+	return
+}
+
 func extract(attrs []html.Attribute) (id string, classes []string) {
 	for _, attr := range attrs {
 		switch attr.Key {
