@@ -87,15 +87,18 @@ func Flatten(root *html.Node, allowed map[string]bool) {
 				childtip := tip.FirstChild
 				if tip.PrevSibling != nil {
 					tip.PrevSibling.NextSibling = childtip
+					childtip.PrevSibling = tip.PrevSibling
 				} else {
 					tip.Parent.FirstChild = childtip
 				}
-				for childtip != nil {
+				for childtip.NextSibling != nil {
 					childtip.Parent = tip.Parent
 					childtip = childtip.NextSibling
 				}
+				childtip.Parent = tip.Parent
 				if tip.NextSibling != nil {
 					tip.NextSibling.PrevSibling = childtip
+					childtip.NextSibling = tip.NextSibling
 				} else {
 					tip.Parent.LastChild = childtip
 				}

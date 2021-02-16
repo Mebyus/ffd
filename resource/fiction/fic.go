@@ -114,16 +114,19 @@ func (c *Chapter) FormatTXT(dst io.Writer) (err error) {
 				}
 			}
 			text += p
-			if space {
+			if space && p != "" {
 				space = false
 				text += " "
 			}
 		case html.ElementNode:
-			if n.Data == "p" {
+			switch n.Data {
+			case "p":
 				text += "\n\n"
-			} else if n.Data == "i" || n.Data == "b" {
-				space = true
-				text += " "
+			case "i", "b", "em", "strong":
+				if !space {
+					space = true
+					text += " "
+				}
 			}
 		}
 	}

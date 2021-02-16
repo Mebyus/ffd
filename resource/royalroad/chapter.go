@@ -46,12 +46,14 @@ func extractChapterBody(d *document.Document) (root *html.Node) {
 	root = nodes[0]
 	document.Detach(root)
 	allowed := map[string]bool{
-		"p":     true,
-		"i":     true,
-		"b":     true,
-		"table": true,
-		"tr":    true,
-		"td":    true,
+		"p":      true,
+		"i":      true,
+		"b":      true,
+		"table":  true,
+		"tr":     true,
+		"td":     true,
+		"em":     true,
+		"strong": true,
 	}
 	document.Flatten(root, allowed)
 	return
