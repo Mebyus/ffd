@@ -2,6 +2,35 @@ package document
 
 import "golang.org/x/net/html"
 
+// Detach separates a given node from its tree and
+// tranforms the node into a tree root
+// by detaching it from its parent and siblings,
+// but preserving children.
+func Detach(node *html.Node) {
+	if node == nil {
+		return
+	}
+	if node.Parent != nil {
+		if node.Parent.FirstChild == node {
+			node.Parent.FirstChild = node.NextSibling
+		}
+		if node.Parent.LastChild == node {
+			node.Parent.LastChild = node.PrevSibling
+		}
+		node.Parent = nil
+	}
+
+	if node.NextSibling != nil {
+		node.NextSibling.PrevSibling = node.PrevSibling
+		node.NextSibling = nil
+	}
+
+	if node.PrevSibling != nil {
+		node.PrevSibling.NextSibling = node.NextSibling
+		node.PrevSibling = nil
+	}
+}
+
 // Equal checks whether two trees are equal or not.
 // Equality means the same structures in terms of
 // node types, contentes and connections

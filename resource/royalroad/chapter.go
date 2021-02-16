@@ -3,13 +3,13 @@ package royalroad
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/mebyus/ffd/document"
+	"github.com/mebyus/ffd/resource/fiction"
 	"golang.org/x/net/html"
 )
 
-func parseChapter(source io.Reader) (result io.Reader, err error) {
+func parseChapter(source io.Reader) (chapter *fiction.Chapter, err error) {
 	n, err := html.Parse(source)
 	if err != nil {
 		return
@@ -17,8 +17,11 @@ func parseChapter(source io.Reader) (result io.Reader, err error) {
 	d := document.FromNode(n)
 
 	title := extractTitle(d)
-	text := extractChapterText(d)
-	result = strings.NewReader("\n\n" + title + text)
+	chapterBody := extractChapterBody(d)
+	chapter = &fiction.Chapter{
+		Title: title,
+		Body:  chapterBody,
+	}
 	return
 }
 
@@ -32,7 +35,7 @@ func extractTitle(d *document.Document) (title string) {
 	return
 }
 
-func extractChapterText(d *document.Document) (text string) {
+func extractChapterBody(d *document.Document) (root *html.Node) {
 	nodes := d.GetNodesByClass("chapter-inner")
 	if len(nodes) == 0 {
 		fmt.Println("unable to locate chapter text container")
@@ -40,17 +43,16 @@ func extractChapterText(d *document.Document) (text string) {
 	} else if len(nodes) > 1 {
 		fmt.Println("located several potential text containers")
 	}
-
-	action := func(n *html.Node) {
-		switch n.Type {
-		case html.TextNode:
-			text += strings.TrimSpace(n.Data)
-		case html.ElementNode:
-			if n.Data == "p" {
-				text += "\n\n"
-			}
-		}
+	root = nodes[0]
+	document.Detach(root)
+	allowed := map[string]bool{
+		"p":     true,
+		"i":     true,
+		"b":     true,
+		"table": true,
+		"tr":    true,
+		"td":    true,
 	}
-	document.Walk(nodes[0], action)
+	document.Flatten(root, allowed)
 	return
 }

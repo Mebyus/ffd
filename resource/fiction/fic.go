@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/mebyus/ffd/cmn"
 	"github.com/mebyus/ffd/document"
 	"golang.org/x/net/html"
 )
@@ -29,25 +30,47 @@ type Book struct {
 	Chapters []Chapter
 }
 
-func (b *Book) Save(dirpath string, format RenderFormat) (err error) {
-	file, err := os.Create(filepath.Join(dirpath, b.Filename(format)))
+func ext(format RenderFormat) string {
+	switch format {
+	case TXT:
+		return ".txt"
+	case FB2:
+		return ".fb2"
+	default:
+		return ""
+	}
+}
+
+func filename(name string, format RenderFormat) string {
+	return name + ext(format)
+}
+
+func (b *Book) save(path string, format RenderFormat) (err error) {
+	err = os.MkdirAll(filepath.Dir(path), 0774)
 	if err != nil {
 		return
 	}
+	file, err := os.Create(path)
+	if err != nil {
+		return
+	}
+	defer cmn.SmartClose(file)
 	err = b.Format(file, format)
 	return
 }
 
-func (b *Book) Filename(format RenderFormat) (filename string) {
-	ext := ""
-	switch format {
-	case TXT:
-		ext = ".txt"
-	case FB2:
-		ext = ".fb2"
-	}
-	filename = b.Title + ext
+func (b *Book) SaveAs(dirpath, name string, format RenderFormat) (err error) {
+	err = b.save(filepath.Join(dirpath, filename(name, format)), format)
 	return
+}
+
+func (b *Book) Save(dirpath string, format RenderFormat) (err error) {
+	err = b.save(filepath.Join(dirpath, b.Filename(format)), format)
+	return
+}
+
+func (b *Book) Filename(format RenderFormat) string {
+	return filename(b.Title, format)
 }
 
 func (b *Book) Format(dst io.Writer, format RenderFormat) (err error) {
