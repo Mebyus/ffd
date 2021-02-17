@@ -7,6 +7,7 @@ import (
 	"github.com/mebyus/ffd/document"
 	"github.com/mebyus/ffd/resource/fiction"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 func parseChapter(source io.Reader) (chapter *fiction.Chapter, err error) {
@@ -56,5 +57,7 @@ func extractChapterBody(d *document.Document) (root *html.Node) {
 		"strong": true,
 	}
 	document.Flatten(root, allowed)
+	root.Data = "section"
+	root.DataAtom = atom.Section
 	return
 }

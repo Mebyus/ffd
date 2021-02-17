@@ -31,7 +31,6 @@ func (t *rrTools) Download(target string, saveSource bool) (book *fiction.Book, 
 	if err != nil {
 		return
 	}
-	book.Title = name
 	fmt.Printf("Finished downloading [ %s ]\n", name)
 	return
 }
@@ -41,8 +40,6 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (b
 	if err != nil {
 		return
 	}
-
-	// fmt.Printf("Output file: %s\n", outpath)
 
 	saveSourceDir := filepath.Join(setting.SourceSaveDir, name)
 	if saveSource {
@@ -95,6 +92,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (b
 	fmt.Printf("Parsing %d pages took: %v (%v per page)\n", pages, parsingDuration,
 		parsingDuration/time.Duration(pages))
 	book = &fiction.Book{
+		Title:    name,
 		Chapters: chapters,
 	}
 	return
