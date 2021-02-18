@@ -5,6 +5,7 @@ import (
 
 	"github.com/mebyus/ffd/cli"
 	"github.com/mebyus/ffd/resource"
+	"github.com/mebyus/ffd/resource/fiction"
 )
 
 func parse(command *cli.Command) (err error) {
@@ -18,8 +19,12 @@ func parse(command *cli.Command) (err error) {
 	if resourceID == "" {
 		return fmt.Errorf("\"parse\" command: resource is not specified")
 	}
+	format := fiction.RenderFormat(command.Flags["format"])
+	if format == "" {
+		format = fiction.TXT
+	}
 	_, separate := command.Flags["s"]
-	err = resource.Parse(command.Target, resourceID, separate)
+	err = resource.Parse(command.Target, resourceID, separate, format)
 	if err != nil {
 		return
 	}
