@@ -3,11 +3,11 @@ package fanfiction
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/mebyus/ffd/document"
 	"github.com/mebyus/ffd/resource/fiction"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 func (t *ffTools) Parse(src io.Reader) (book *fiction.Book, err error) {
@@ -19,32 +19,46 @@ func (t *ffTools) Parse(src io.Reader) (book *fiction.Book, err error) {
 	return
 }
 
-func parsePage(source io.Reader) (result io.Reader, pages int64, err error) {
+func parsePage(source io.Reader) (chapter *fiction.Chapter, pages int64, err error) {
 	n, err := html.Parse(source)
 	if err != nil {
 		return
 	}
 	d := document.FromNode(n)
-	storytextDiv := d.GetNodeById("storytext")
-	text := extractChapter(storytextDiv)
-	result = strings.NewReader(text)
+
+	chapterRoot, err := extractChapter(d)
+	if err != nil {
+		return
+	}
+	chapter = &fiction.Chapter{
+		Body: chapterRoot,
+	}
 	chapterSelector := d.GetNodeById("chap_select")
 	options := document.FindByTag(chapterSelector, "option")
 	pages = int64(len(options))
 	return
 }
 
-func extractChapter(chapterContainer *html.Node) (chapter string) {
-	action := func(n *html.Node) {
-		switch n.Type {
-		case html.TextNode:
-			chapter += strings.TrimSpace(n.Data)
-		case html.ElementNode:
-			if n.Data == "p" {
-				chapter += "\n\n"
-			}
-		}
+func extractChapter(d *document.Document) (root *html.Node, err error) {
+	storytextDiv := d.GetNodeById("storytext")
+	if storytextDiv == nil {
+		err = fmt.Errorf("unable to locate chapter text container")
+		return
 	}
-	document.Walk(chapterContainer, action)
+	document.Detach(storytextDiv)
+	allowed := map[string]bool{
+		"p":      true,
+		"i":      true,
+		"b":      true,
+		"table":  true,
+		"tr":     true,
+		"td":     true,
+		"em":     true,
+		"strong": true,
+	}
+	root = storytextDiv
+	document.Flatten(root, allowed)
+	root.Data = "section"
+	root.DataAtom = atom.Section
 	return
 }
