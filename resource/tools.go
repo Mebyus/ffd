@@ -10,6 +10,7 @@ import (
 	"github.com/mebyus/ffd/resource/fanfiction"
 	"github.com/mebyus/ffd/resource/fiction"
 	"github.com/mebyus/ffd/resource/royalroad"
+	"github.com/mebyus/ffd/resource/samlib"
 	"github.com/mebyus/ffd/resource/spacebattles"
 	"github.com/mebyus/ffd/track/fic"
 )
@@ -73,6 +74,8 @@ func ChooseByID(resourceID string) (t tools, err error) {
 
 func ChooseByHostname(hostname string) (t tools, err error) {
 	switch hostname {
+	case samlib.Hostname:
+		t = samlib.NewTools()
 	case spacebattles.Hostname:
 		t = spacebattles.NewTools()
 	case "forums.sufficientvelocity.com":
