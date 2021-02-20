@@ -86,6 +86,13 @@ func (b *Book) Format(dst io.Writer, format RenderFormat) (err error) {
 }
 
 func (b *Book) FormatFB2(dst io.Writer) (err error) {
+	// write something better to ensure the whole string will be written
+	_, err = io.WriteString(dst, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+	if err != nil {
+		return
+	}
+	root := fb2base(b.Chapters)
+	err = html.Render(dst, root)
 	return
 }
 
