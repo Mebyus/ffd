@@ -11,10 +11,13 @@ import (
 )
 
 func (t *ffTools) Parse(src io.Reader) (book *fiction.Book, err error) {
-	_, _, err = parsePage(src)
+	chapter, _, err := parsePage(src)
 	if err != nil {
 		err = fmt.Errorf("Parsing piece: %v", err)
 		return
+	}
+	book = &fiction.Book{
+		Chapters: []fiction.Chapter{*chapter},
 	}
 	return
 }

@@ -8,10 +8,13 @@ import (
 )
 
 func (t *sbTools) Parse(src io.Reader) (book *fiction.Book, err error) {
-	_, _, err = parsePiece(src)
+	chapters, _, err := parsePiece(src)
 	if err != nil {
 		err = fmt.Errorf("Parsing piece: %v", err)
 		return
+	}
+	book = &fiction.Book{
+		Chapters: chapters,
 	}
 	return
 }

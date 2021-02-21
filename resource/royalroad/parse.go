@@ -8,10 +8,13 @@ import (
 )
 
 func (t *rrTools) Parse(src io.Reader) (book *fiction.Book, err error) {
-	_, err = parseChapter(src)
+	chapter, err := parseChapter(src)
 	if err != nil {
 		err = fmt.Errorf("Parsing piece: %v", err)
 		return
+	}
+	book = &fiction.Book{
+		Chapters: []fiction.Chapter{*chapter},
 	}
 	return
 }
