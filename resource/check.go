@@ -12,6 +12,6 @@ func Check(target string) (f *fic.Info, err error) {
 		err = fmt.Errorf("choosing tool for %s: %v", target, err)
 		return
 	}
-	f = t.Check(target)
+	f, err = t.Check(target)
 	return
 }

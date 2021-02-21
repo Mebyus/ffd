@@ -3,18 +3,18 @@ package royalroad
 import (
 	"fmt"
 	"io"
+
+	"github.com/mebyus/ffd/resource/fiction"
 )
 
-func (t *rrTools) Parse(src io.Reader, dst io.Writer) (err error) {
-	r, err := parseChapter(src)
+func (t *rrTools) Parse(src io.Reader) (book *fiction.Book, err error) {
+	chapter, err := parseChapter(src)
 	if err != nil {
 		err = fmt.Errorf("Parsing piece: %v", err)
 		return
 	}
-	_, err = io.Copy(dst, r)
-	if err != nil {
-		err = fmt.Errorf("Saving chapter to destination: %v", err)
-		return
+	book = &fiction.Book{
+		Chapters: []fiction.Chapter{*chapter},
 	}
 	return
 }

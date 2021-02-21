@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/mebyus/ffd/cmn"
+	"github.com/mebyus/ffd/resource/fiction"
 	"github.com/mebyus/ffd/setting"
 )
 
-func Parse(dirpath, resourceID string, separate bool) (err error) {
+func Parse(dirpath, resourceID string, separate bool, format fiction.RenderFormat) (err error) {
 	dir, err := os.Open(dirpath)
 	if err != nil {
 		return
@@ -34,50 +34,45 @@ func Parse(dirpath, resourceID string, separate bool) (err error) {
 		return
 	}
 	if separate {
-		err = parseSeparate(dirstat.Name(), dirpath, tool, dirnames)
+		err = parseSeparate(dirstat.Name(), dirpath, tool, dirnames, format)
 	} else {
-		err = parseTogether(dirstat.Name(), dirpath, tool, dirnames)
+		err = parseTogether(dirstat.Name(), dirpath, tool, dirnames, format)
 	}
 	return
 }
 
-func parseTogether(name, dirpath string, tool tools, dirnames []string) (err error) {
-	err = os.MkdirAll(setting.OutDir, 0766)
-	if err != nil {
-		return
+func parseTogether(name, dirpath string, tool tools, dirnames []string, format fiction.RenderFormat) (err error) {
+	chapters := []fiction.Chapter{}
+	for _, partname := range dirnames {
+		file, err := os.Open(filepath.Join(dirpath, partname))
+		if err != nil {
+			return err
+		}
+		defer cmn.SmartClose(file)
+		fstat, err := file.Stat()
+		if err != nil {
+			return err
+		}
+		if !fstat.IsDir() {
+			book, err := tool.Parse(file)
+			if err != nil {
+				return err
+			}
+			chapters = append(chapters, book.Chapters...)
+		}
 	}
-	outpath := filepath.Join(setting.OutDir, name+".txt")
-	outfile, err := os.Create(outpath)
+	combinedBook := &fiction.Book{
+		Chapters: chapters,
+	}
+	err = combinedBook.SaveAs(setting.OutDir, name, format)
 	if err != nil {
 		return err
 	}
-	defer cmn.SmartClose(outfile)
-	for _, partname := range dirnames {
-		file, err := os.Open(filepath.Join(dirpath, partname))
-		if err != nil {
-			return err
-		}
-		defer cmn.SmartClose(file)
-		fstat, err := file.Stat()
-		if err != nil {
-			return err
-		}
-		if !fstat.IsDir() {
-			err := tool.Parse(file, outfile)
-			if err != nil {
-				return err
-			}
-		}
-	}
 	return
 }
 
-func parseSeparate(name, dirpath string, tool tools, dirnames []string) (err error) {
+func parseSeparate(name, dirpath string, tool tools, dirnames []string, format fiction.RenderFormat) (err error) {
 	outdirpath := filepath.Join(setting.OutDir, name)
-	err = os.MkdirAll(outdirpath, 0766)
-	if err != nil {
-		return
-	}
 	for _, partname := range dirnames {
 		file, err := os.Open(filepath.Join(dirpath, partname))
 		if err != nil {
@@ -89,16 +84,14 @@ func parseSeparate(name, dirpath string, tool tools, dirnames []string) (err err
 			return err
 		}
 		if !fstat.IsDir() {
-			outname := strings.TrimSuffix(name, "html") + "txt"
-			outpath := filepath.Join(outdirpath, outname)
-			outfile, err := os.Create(outpath)
-			if err != nil {
-				return err
-			}
-			defer cmn.SmartClose(outfile)
-			parseErr := tool.Parse(file, outfile)
+			book, parseErr := tool.Parse(file)
 			if parseErr != nil {
 				fmt.Println(parseErr)
+				continue
+			}
+			saveErr := book.SaveAs(outdirpath, partname, format)
+			if saveErr != nil {
+				fmt.Println(saveErr)
 			}
 		}
 	}

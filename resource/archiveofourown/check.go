@@ -13,7 +13,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-func (t *ao3Tools) Check(target string) (f *fic.Info) {
+func (t *ao3Tools) Check(target string) (info *fic.Info, err error) {
 	baseURL, ficID, err := analyze(target)
 	if err != nil {
 		fmt.Println(err)
@@ -30,14 +30,14 @@ func (t *ao3Tools) Check(target string) (f *fic.Info) {
 	fmt.Printf(" [ OK ] %v\n", time.Since(start))
 	defer cmn.SmartClose(indexPage)
 
-	_, f, err = parseIndex(indexPage)
+	_, info, err = parseIndex(indexPage)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	f.ID = ficID
-	f.BaseURL = baseURL
-	f.Location = fic.ArchiveOfOurOwn
+	info.ID = ficID
+	info.BaseURL = baseURL
+	info.Location = fic.ArchiveOfOurOwn
 	return
 }
 
