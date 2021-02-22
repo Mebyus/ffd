@@ -9,4 +9,5 @@ const (
 	SufficientVelocity   Location = "SV"
 	ArchiveOfOurOwn      Location = "AO3"
 	QuestionableQuesting Location = "QQ"
+	WebNovel             Location = "WN"
 )

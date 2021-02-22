@@ -12,6 +12,7 @@ import (
 	"github.com/mebyus/ffd/resource/royalroad"
 	"github.com/mebyus/ffd/resource/samlib"
 	"github.com/mebyus/ffd/resource/spacebattles"
+	"github.com/mebyus/ffd/resource/webnovel"
 	"github.com/mebyus/ffd/track/fic"
 )
 
@@ -33,6 +34,8 @@ func GetLocationForTarget(target string) (location fic.Location, err error) {
 
 func GetLocationForHostname(hostname string) (location fic.Location, err error) {
 	switch hostname {
+	case webnovel.Hostname:
+		location = fic.WebNovel
 	case spacebattles.Hostname:
 		location = fic.SpaceBattles
 	case "forums.sufficientvelocity.com":
@@ -74,6 +77,8 @@ func ChooseByID(resourceID string) (t tools, err error) {
 
 func ChooseByHostname(hostname string) (t tools, err error) {
 	switch hostname {
+	case webnovel.Hostname:
+		t = webnovel.NewTools()
 	case samlib.Hostname:
 		t = samlib.NewTools()
 	case spacebattles.Hostname:
@@ -97,6 +102,8 @@ func ChooseByHostname(hostname string) (t tools, err error) {
 func ChooseByLocation(location string) (t tools, err error) {
 	loc := strings.ToUpper(location)
 	switch fic.Location(loc) {
+	case fic.WebNovel:
+		t = webnovel.NewTools()
 	case fic.SpaceBattles:
 		t = spacebattles.NewTools()
 	case fic.SufficientVelocity:
