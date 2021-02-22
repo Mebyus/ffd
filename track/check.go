@@ -40,12 +40,12 @@ func updateFic(f, u *fic.Info) (updated bool) {
 	return
 }
 
-func updatedMsg(f *fic.Info) string {
+func updatedMsg(f *fic.Info, ficNumber int) string {
 	if len(f.Check.NewChapters) == 0 {
 		return ""
 	}
-	return fmt.Sprintf("%d new chapters (%dk words) in %s\n", len(f.Check.NewChapters),
-		f.Check.Words/1000, f.BaseURL)
+	return fmt.Sprintf("%d new chapters (%dk words) in %d [ %s ]\n", len(f.Check.NewChapters),
+		f.Check.Words/1000, ficNumber, f.BaseURL)
 }
 
 func checkByNumber(trackpath string, n int) (err error) {
@@ -66,7 +66,7 @@ func checkByNumber(trackpath string, n int) (err error) {
 	updated := updateFic(f, updatedFic)
 	fmt.Println()
 	if updated {
-		fmt.Println(updatedMsg(f))
+		fmt.Println(updatedMsg(f, n))
 	}
 	err = fic.Save(originpath, fics)
 	if err != nil {
@@ -92,7 +92,7 @@ func checkAll(trackpath string) (err error) {
 		}
 		updated := updateFic(&fics[i], updatedFic)
 		if updated {
-			updatedMessages = append(updatedMessages, updatedMsg(&fics[i]))
+			updatedMessages = append(updatedMessages, updatedMsg(&fics[i], i+1))
 		}
 	}
 	fmt.Println()
