@@ -51,7 +51,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (b
 	}
 
 	parsingDuration := time.Duration(0)
-	pages := int64(len(urls))
+	pages := len(urls)
 	filenames := cmn.GenerateFilenames(pages, "html")
 	chapters := []fiction.Chapter{}
 	for i, url := range urls {

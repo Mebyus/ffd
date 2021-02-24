@@ -15,7 +15,7 @@ import (
 type sbParser struct {
 }
 
-func parsePiece(source io.Reader) (chapters []fiction.Chapter, pages int64, err error) {
+func parsePiece(source io.Reader) (chapters []fiction.Chapter, pages int, err error) {
 	n, err := html.Parse(source)
 	if err != nil {
 		return
@@ -26,7 +26,7 @@ func parsePiece(source io.Reader) (chapters []fiction.Chapter, pages int64, err 
 	if len(pageNavs) == 0 {
 		pages = 1
 	} else {
-		pages = extractNumberOfPages(pageNavs[0])
+		pages = int(extractNumberOfPages(pageNavs[0]))
 		if pages == 0 {
 			fmt.Printf("unable to determine number of pages\n")
 			pages = 1

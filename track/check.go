@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/mebyus/ffd/cmn"
 	"github.com/mebyus/ffd/resource"
 	"github.com/mebyus/ffd/track/fic"
 )
@@ -41,13 +42,11 @@ func updateFic(f, u *fic.Info) (updated bool) {
 }
 
 func updatedMsg(f *fic.Info, ficNumber int) string {
-	pluralS := ""
-	if len(f.Check.NewChapters) == 0 {
+	n := len(f.Check.NewChapters)
+	if n == 0 {
 		return ""
-	} else if len(f.Check.NewChapters) > 1 {
-		pluralS = "s"
 	}
-	return fmt.Sprintf("%d new chapter%s (%dk words) in %d [ %s ]\n", len(f.Check.NewChapters), pluralS,
+	return fmt.Sprintf("%d new chapter%s (%dk words) in %d [ %s ]\n", n, cmn.Plural(n),
 		f.Check.Words/1000, ficNumber, f.BaseURL)
 }
 

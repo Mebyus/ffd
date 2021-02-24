@@ -28,7 +28,7 @@ func analyze(url string) (base, name, id string, err error) {
 	return
 }
 
-func readerPageURL(baseURL string, pageNumber int64) string {
+func readerPageURL(baseURL string, pageNumber int) string {
 	url := baseURL + "/reader"
 	if pageNumber == 1 {
 		return url

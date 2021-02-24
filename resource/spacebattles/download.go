@@ -77,7 +77,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (b
 		return
 	}
 	parsingDuration := time.Since(start)
-	fmt.Printf("First page parsed. Fic contains %d pages total\n", pages)
+	fmt.Printf("First page parsed. Fic contains %d page%s total\n", pages, cmn.Plural(pages))
 
 	filenames := cmn.GenerateFilenames(pages, "html")
 
@@ -92,7 +92,7 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (b
 
 	chapters := []fiction.Chapter{}
 	chapters = append(chapters, firstChapters...)
-	for i := int64(2); i <= pages; i++ {
+	for i := 2; i <= pages; i++ {
 		fmt.Printf("Downloading page %3d / %d", i, pages)
 		start = time.Now()
 		page, err := cmn.GetBody(readerPageURL(baseURL, i), client)

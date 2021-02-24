@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-const rootURL = "https://www.royalroad.com"
+const rootURL = "https://" + Hostname
 
 func getChapterURLs(indexPageURL string, client *http.Client) (urls []string, err error) {
 	fmt.Printf("Downloading index page...")
@@ -26,14 +26,15 @@ func getChapterURLs(indexPageURL string, client *http.Client) (urls []string, er
 	defer cmn.SmartClose(indexPage)
 
 	fmt.Printf("Parsing index page...\n")
-	urls, _, err = parseIndex(indexPage)
+	hrefs, _, err := parseIndex(indexPage)
 	if err != nil {
 		return
 	}
-	for i := range urls {
-		urls[i] = rootURL + urls[i]
+	urls = make([]string, len(hrefs))
+	for i := range hrefs {
+		urls[i] = rootURL + hrefs[i]
 	}
-	fmt.Printf("Index page parsed. Fic contains %d chapters total\n", len(urls))
+	fmt.Printf("Index page parsed. Fic contains %d chapter%s total\n", len(urls), cmn.Plural(len(urls)))
 	return
 }
 
