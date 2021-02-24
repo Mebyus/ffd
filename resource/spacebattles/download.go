@@ -57,6 +57,8 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (b
 			return
 		}
 		fmt.Printf("Source files will be saved to: %s\n", saveSourceDir)
+
+		// Temporary name, we will rename this file after parsing the first page
 		fp := filepath.Join(saveSourceDir, "1.html")
 		sourcefile, err := os.Create(fp)
 		if err != nil {
@@ -78,6 +80,16 @@ func downloadSync(baseURL, name string, saveSource bool, client *http.Client) (b
 	fmt.Printf("First page parsed. Fic contains %d pages total\n", pages)
 
 	filenames := cmn.GenerateFilenames(pages, "html")
+
+	// Rename first source file "1.html"
+	// If fic has less than 10 pages it's pointless, so we won't do it
+	if saveSource && pages > 9 {
+		err = os.Rename(filepath.Join(saveSourceDir, "1.html"), filepath.Join(saveSourceDir, filenames[0]))
+		if err != nil {
+			fmt.Printf("renaming first source file: %v\n", err)
+		}
+	}
+
 	chapters := []fiction.Chapter{}
 	chapters = append(chapters, firstChapters...)
 	for i := int64(2); i <= pages; i++ {
