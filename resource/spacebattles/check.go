@@ -15,7 +15,7 @@ import (
 )
 
 func (t *sbTools) Check(target string) (info *fic.Info, err error) {
-	baseURL, _, err := analyze(target)
+	baseURL, _, id, err := analyze(target)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -36,6 +36,7 @@ func (t *sbTools) Check(target string) (info *fic.Info, err error) {
 		fmt.Println(err)
 		return
 	}
+	info.ID = id
 	info.BaseURL = baseURL
 	info.Location = fic.SpaceBattles
 	return

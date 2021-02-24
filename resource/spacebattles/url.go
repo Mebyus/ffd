@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func analyze(url string) (base, name string, err error) {
+func analyze(url string) (base, name, id string, err error) {
 	split := strings.Split(url, "/")
 	if len(split) < 2 {
 		err = fmt.Errorf("incorrect url")
@@ -19,7 +19,11 @@ func analyze(url string) (base, name string, err error) {
 		err = fmt.Errorf("incorrect url")
 		return
 	}
-	name = strings.Split(split[parts-1], ".")[0]
+	threadNameSplit := strings.Split(split[parts-1], ".")
+	name = threadNameSplit[0]
+	if len(threadNameSplit) == 2 {
+		id = threadNameSplit[1]
+	}
 	base = strings.Join(split[:parts], "/")
 	return
 }
