@@ -71,27 +71,19 @@ func extractThreadmarkList(d *document.Document) (list []fic.Chapter) {
 	} else if len(containers) > 1 {
 		fmt.Println("located several potential list containers")
 	}
-	datetimes := document.FindAttributeValues(containers[0], "datetime")
 	listItems := d.GetNodesByClass("structItem--threadmark")
-	if len(datetimes) != len(listItems) {
-		fmt.Printf("number of dates (%d) and threadmarks (%d) doesn't match\n", len(datetimes), len(listItems))
-	}
-	j := 0
-	for i, node := range listItems {
-		if j == len(datetimes) {
-			break
-		}
+	for _, node := range listItems {
 		row := document.FindNonSpaceTexts(node)
 		if len(row) != 4 && len(row) != 5 {
-			fmt.Printf("wrong number of elements (%d) in row %d\n", len(row), i+1)
+			// It's a row with ...
 			continue
 		} else if len(row) == 5 {
 			row = row[1:]
 		}
 		link := document.FindFirstByTag(node, "a")
-		created, err := time.Parse("2006-01-02T15:04:05-0700", datetimes[j])
+		created, err := time.Parse("2006-01-02T15:04:05-0700", row[3])
 		if err != nil {
-			fmt.Printf("unable to parse chapter creation time [ %s ]: %v\n", datetimes[j], err)
+			fmt.Printf("unable to parse chapter creation time [ %s ]: %v\n", row[3], err)
 		}
 		name := row[0]
 		words := convertWordCount(row[2])
@@ -101,7 +93,6 @@ func extractThreadmarkList(d *document.Document) (list []fic.Chapter) {
 			Words:   words,
 			Created: created,
 		})
-		j++
 	}
 	return
 }

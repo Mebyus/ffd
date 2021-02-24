@@ -41,11 +41,24 @@ func updateFic(f, u *fic.Info) (updated bool) {
 }
 
 func updatedMsg(f *fic.Info, ficNumber int) string {
+	pluralS := ""
 	if len(f.Check.NewChapters) == 0 {
 		return ""
+	} else if len(f.Check.NewChapters) > 1 {
+		pluralS = "s"
 	}
-	return fmt.Sprintf("%d new chapters (%dk words) in %d [ %s ]\n", len(f.Check.NewChapters),
+	return fmt.Sprintf("%d new chapter%s (%dk words) in %d [ %s ]\n", len(f.Check.NewChapters), pluralS,
 		f.Check.Words/1000, ficNumber, f.BaseURL)
+}
+
+func update(f *fic.Info) (updated bool, err error) {
+	fmt.Printf("Checking %s [ %s ]\n", f.Location, f.Name)
+	updatedFic, err := resource.Check(f.BaseURL)
+	if err != nil {
+		return
+	}
+	updated = updateFic(f, updatedFic)
+	return
 }
 
 func checkByNumber(trackpath string, n int) (err error) {
@@ -58,12 +71,10 @@ func checkByNumber(trackpath string, n int) (err error) {
 		return
 	}
 	f := &fics[n-1]
-	fmt.Printf("Checking [ %s ]\n", f.BaseURL)
-	updatedFic, err := resource.Check(f.BaseURL)
+	updated, err := update(f)
 	if err != nil {
 		return err
 	}
-	updated := updateFic(f, updatedFic)
 	fmt.Println()
 	if updated {
 		fmt.Println(updatedMsg(f, n))
@@ -82,17 +93,16 @@ func checkAll(trackpath string) (err error) {
 	}
 	updatedMessages := make([]string, 0)
 	for i := range fics {
-		if fics[i].Check.Suppressed || fics[i].Finished {
+		f := &fics[i]
+		if f.Check.Suppressed || f.Finished {
 			continue
 		}
-		fmt.Printf("Checking [ %s ]\n", fics[i].BaseURL)
-		updatedFic, err := resource.Check(fics[i].BaseURL)
+		updated, err := update(f)
 		if err != nil {
 			return err
 		}
-		updated := updateFic(&fics[i], updatedFic)
 		if updated {
-			updatedMessages = append(updatedMessages, updatedMsg(&fics[i], i+1))
+			updatedMessages = append(updatedMessages, updatedMsg(f, i+1))
 		}
 	}
 	fmt.Println()
