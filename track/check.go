@@ -22,6 +22,10 @@ func Check(trackpath string, target string) (err error) {
 
 func updateFic(f, u *fic.Info) (updated bool) {
 	newChapters := fic.Compare(f.Chapters, u.Chapters)
+	if f.ID != u.ID {
+		fmt.Printf("Id of [ %s ] has changed from \"%s\" to \"%s\"\n", f.Name, f.ID, u.ID)
+		f.ID = u.ID
+	}
 	f.Check.NewChapters = newChapters
 	f.Check.Words = fic.CountWords(newChapters)
 	f.Chapters = append(f.Chapters, newChapters...)

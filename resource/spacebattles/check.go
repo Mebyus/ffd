@@ -71,19 +71,25 @@ func extractThreadmarkList(d *document.Document) (list []fic.Chapter) {
 	} else if len(containers) > 1 {
 		fmt.Println("located several potential list containers")
 	}
+	datetimes := document.FindAttributeValues(containers[0], "datetime")
 	listItems := d.GetNodesByClass("structItem--threadmark")
+	j := 0
 	for _, node := range listItems {
+		if j == len(datetimes) {
+			fmt.Printf("array of dates (%d) have been exhausted\n", len(datetimes))
+			break
+		}
 		row := document.FindNonSpaceTexts(node)
 		if len(row) != 4 && len(row) != 5 {
-			// It's a row with ...
+			// Skip row with dots sign (...)
 			continue
 		} else if len(row) == 5 {
 			row = row[1:]
 		}
 		link := document.FindFirstByTag(node, "a")
-		created, err := time.Parse("2006-01-02T15:04:05-0700", row[3])
+		created, err := time.Parse("2006-01-02T15:04:05-0700", datetimes[j])
 		if err != nil {
-			fmt.Printf("unable to parse chapter creation time [ %s ]: %v\n", row[3], err)
+			fmt.Printf("unable to parse chapter creation time [ %s ]: %v\n", datetimes[j], err)
 		}
 		name := row[0]
 		words := convertWordCount(row[2])
@@ -93,6 +99,7 @@ func extractThreadmarkList(d *document.Document) (list []fic.Chapter) {
 			Words:   words,
 			Created: created,
 		})
+		j++
 	}
 	return
 }
