@@ -56,6 +56,7 @@ func (b *Book) save(path string, format RenderFormat) (err error) {
 	}
 	defer cmn.SmartClose(file)
 	err = b.Format(file, format)
+	fmt.Printf("Fic saved as: %s\n", path)
 	return
 }
 

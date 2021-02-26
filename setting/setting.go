@@ -14,6 +14,7 @@ const (
 	defSourceSaveDir = "source"
 	defTrackPath     = "track.json"
 	defConfigPath    = "config.json"
+	defHistoryPath   = "history.txt"
 	defClientTimeout = 15 * time.Second
 )
 
@@ -22,6 +23,7 @@ var (
 	SourceSaveDir = defSourceSaveDir
 	ClientTimeout = defClientTimeout
 	TrackPath     = defTrackPath
+	HistoryPath   = defHistoryPath
 )
 
 type settings struct {

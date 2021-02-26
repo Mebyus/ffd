@@ -2,8 +2,11 @@ package resource
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strconv"
 
+	"github.com/mebyus/ffd/cmn"
 	"github.com/mebyus/ffd/resource/fiction"
 	"github.com/mebyus/ffd/setting"
 	"github.com/mebyus/ffd/track/fic"
@@ -25,11 +28,26 @@ func Download(target string, saveSource bool, format fiction.RenderFormat) (err 
 	return
 }
 
+func saveHistory(target string) (err error) {
+	file, err := os.OpenFile(setting.HistoryPath, os.O_CREATE|os.O_APPEND, 0664)
+	if err != nil {
+		return
+	}
+	defer cmn.SmartClose(file)
+	_, err = io.WriteString(file, target+"\n")
+	return
+}
+
 func downloadFromURL(target string, saveSource bool, format fiction.RenderFormat) (err error) {
 	t, err := ChooseByTarget(target)
 	if err != nil {
 		err = fmt.Errorf("choosing tool for %s: %v", target, err)
 		return
+	}
+	err = saveHistory(target)
+	if err != nil {
+		fmt.Printf("Saving history: %v\n", err)
+		err = nil
 	}
 	book, err := t.Download(target, saveSource)
 	if err != nil {
