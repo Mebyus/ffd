@@ -36,6 +36,8 @@ func main() {
 		executor = list
 	case "tidy":
 		executor = tidy
+	case "clean":
+		executor = clean
 	default:
 		executor = unknown
 	}
