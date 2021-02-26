@@ -2,6 +2,7 @@ package resource
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -9,6 +10,23 @@ import (
 	"github.com/mebyus/ffd/resource/fiction"
 	"github.com/mebyus/ffd/setting"
 )
+
+func ParseReader(src io.Reader, resourceID string, format fiction.RenderFormat) (err error) {
+	tool, err := ChooseByID(resourceID)
+	if err != nil {
+		err = fmt.Errorf("choosing tool for %s: %v", resourceID, err)
+		return
+	}
+	book, err := tool.Parse(src)
+	if err != nil {
+		return err
+	}
+	err = book.SaveAs(setting.OutDir, "stdin", format)
+	if err != nil {
+		return err
+	}
+	return
+}
 
 func Parse(dirpath, resourceID string, separate bool, format fiction.RenderFormat) (err error) {
 	dir, err := os.Open(dirpath)

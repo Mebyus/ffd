@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/mebyus/ffd/cli"
 	"github.com/mebyus/ffd/resource"
@@ -9,9 +10,6 @@ import (
 )
 
 func parse(command *cli.Command) (err error) {
-	if command.Target == "" {
-		return fmt.Errorf("\"parse\" command: target is not specified")
-	}
 	resourceID := command.Flags["resource"]
 	if resourceID == "" {
 		resourceID = command.Flags["res"]
@@ -24,9 +22,10 @@ func parse(command *cli.Command) (err error) {
 		format = fiction.TXT
 	}
 	_, separate := command.Flags["s"]
-	err = resource.Parse(command.Target, resourceID, separate, format)
-	if err != nil {
-		return
+	if command.Target == "" {
+		err = resource.ParseReader(os.Stdin, resourceID, format)
+	} else {
+		err = resource.Parse(command.Target, resourceID, separate, format)
 	}
-	return nil
+	return
 }
