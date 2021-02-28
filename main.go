@@ -9,42 +9,22 @@ import (
 	"github.com/mebyus/ffd/setting"
 )
 
-func unknown(command *cli.Command) (err error) {
-	return fmt.Errorf("unknown command")
-}
-
 func main() {
+	if len(os.Args) == 0 {
+		fmt.Println("no args to process")
+		return
+	}
 	command := cli.Parse(os.Args[1:])
 
-	var executor func(command *cli.Command) error
-	switch command.Name {
-	case "download":
-		executor = download
-	case "parse":
-		executor = parse
-	case "help":
-		executor = help
-	case "add":
-		executor = add
-	case "remove":
-		executor = remove
-	case "check":
-		executor = check
-	case "suppress":
-		executor = suppress
-	case "list":
-		executor = list
-	case "tidy":
-		executor = tidy
-	case "clean":
-		executor = clean
-	default:
-		executor = unknown
+	executor, err := cli.CreateExecutor(command)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 
 	setting.Load()
 	go planner.Planner()
-	err := executor(command)
+	err = executor.Execute()
 	if err != nil {
 		fmt.Printf("Command execution: %v\n", err)
 		return

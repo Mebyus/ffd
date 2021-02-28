@@ -1,12 +1,11 @@
-package main
+package cli
 
 import (
 	"fmt"
 
-	"github.com/mebyus/ffd/cli"
 )
 
-func help(command *cli.Command) (err error) {
+func help(c *Command) (err error) {
 	fmt.Println(`FanFiction Dissector
 	Available commands:
 
