@@ -37,5 +37,6 @@ func Add(target, trackpath string) (err error) {
 	if err != nil {
 		return
 	}
+	fmt.Printf("Fic added under index %d\n", len(fics))
 	return
 }
