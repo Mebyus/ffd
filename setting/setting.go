@@ -40,7 +40,7 @@ func load() (s settings, useDefaults bool, err error) {
 		return
 	}
 	execdir := filepath.Dir(execpath)
-	b, err := ioutil.ReadFile(filepath.Join(defConfigPath))
+	b, err := ioutil.ReadFile(filepath.Join(execdir, defConfigPath))
 	if err != nil {
 		fmt.Printf("couldn't read config file: %v\n", err)
 		err = saveDefault(execdir)
