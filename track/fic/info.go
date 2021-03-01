@@ -26,6 +26,10 @@ type Check struct {
 	NewChapters []Chapter
 }
 
+type Bookmark struct {
+	Chapter int
+}
+
 type Info struct {
 	ID         string
 	BaseURL    string
@@ -38,6 +42,7 @@ type Info struct {
 	Created    time.Time
 	Updated    time.Time
 	Chapters   []Chapter
+	Bookmark   Bookmark
 	Check      Check
 }
 

@@ -23,6 +23,7 @@ var sem = map[string]func(c *Command) (err error){
 	"list":     list,
 	"tidy":     tidy,
 	"clean":    clean,
+	"bookmark": bookmark,
 }
 
 func CreateExecutor(c *Command) (e Executor, err error) {
