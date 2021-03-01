@@ -15,12 +15,17 @@ import (
 )
 
 func (t *slTools) Download(target string, saveSource bool) (book *fiction.Book, err error) {
-	page, err := cmn.GetBody(target, planner.Client)
+	baseURL, name, err := analyze(target)
+	if err != nil {
+		return
+	}
+	page, err := cmn.GetBody(baseURL, planner.Client)
 	if err != nil {
 		return
 	}
 	defer cmn.SmartClose(page)
 	book, err = parsePage(charmap.Windows1251.NewDecoder().Reader(page))
+	book.Title = name
 	return
 }
 
@@ -35,7 +40,6 @@ func parsePage(source io.Reader) (book *fiction.Book, err error) {
 		return
 	}
 	book = &fiction.Book{
-		Title:    "1111",
 		Chapters: chapters,
 	}
 	return
@@ -44,8 +48,11 @@ func parsePage(source io.Reader) (book *fiction.Book, err error) {
 func extractChapters(d *document.Document) (chapters []fiction.Chapter, err error) {
 	nodes := d.GetNodesByTag("xxx7")
 	if len(nodes) == 0 {
-		err = fmt.Errorf("unable to locate chapter text container")
-		return
+		nodes = d.GetNodesByTag("body")
+		if len(nodes) == 0 {
+			err = fmt.Errorf("unable to locate chapter text container")
+			return
+		}
 	}
 	root := nodes[0]
 	root.Data = "section"

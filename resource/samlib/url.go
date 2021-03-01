@@ -1,19 +1,9 @@
-package royalroad
+package samlib
 
 import (
 	"fmt"
 	"strings"
 )
-
-type rrTools struct {
-	ficName    string
-	chapters   int
-	saveSource bool
-}
-
-func NewTools() *rrTools {
-	return &rrTools{}
-}
 
 func analyze(url string) (base, name string, err error) {
 	split := strings.Split(url, "/")
@@ -29,7 +19,8 @@ func analyze(url string) (base, name string, err error) {
 		err = fmt.Errorf("incorrect url")
 		return
 	}
-	name = split[parts-1]
+	shtmlNameSplit := strings.Split(split[parts-1], ".")
+	name = strings.Replace(shtmlNameSplit[0], "_", "-", -1) + "_" + strings.Replace(split[parts-2], "_", "-", -1)
 	base = strings.Join(split[:parts], "/")
 	return
 }

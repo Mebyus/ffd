@@ -12,7 +12,7 @@ func analyze(url string) (base, name string, err error) {
 		return
 	}
 	parts := 3
-	if split[0] == "https:" || split[0] == "http" {
+	if split[0] == "https:" || split[0] == "http:" {
 		parts = 5
 	}
 	if len(split) < parts || split[parts-1] == "" {
