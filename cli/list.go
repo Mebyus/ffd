@@ -6,7 +6,7 @@ import (
 
 func list(c *Command) (err error) {
 	trackpath := c.Flags["track"]
-	err = track.List(trackpath)
+	err = track.List(trackpath, c.Target)
 	if err != nil {
 		return err
 	}
