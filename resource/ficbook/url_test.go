@@ -1,4 +1,4 @@
-package archiveofourown
+package ficbook
 
 import "testing"
 
@@ -34,46 +34,37 @@ func Test_analyze(t *testing.T) {
 		{
 			name: "work id missing",
 			args: args{
-				url: "https://archiveofourown.org/works/",
+				url: "https://ficbook.net/readfic",
 			},
 			wantBase: "",
 			wantID:   "",
 			wantErr:  true,
 		},
 		{
-			name: "navigate with slash at the end",
-			args: args{
-				url: "https://archiveofourown.org/works/29288139/navigate/",
-			},
-			wantBase: "https://archiveofourown.org/works/29288139",
-			wantID:   "29288139",
-			wantErr:  false,
-		},
-		{
-			name: "navigate",
-			args: args{
-				url: "https://archiveofourown.org/works/29288139/navigate",
-			},
-			wantBase: "https://archiveofourown.org/works/29288139",
-			wantID:   "29288139",
-			wantErr:  false,
-		},
-		{
 			name: "just base",
 			args: args{
-				url: "https://archiveofourown.org/works/29288139",
+				url: "https://ficbook.net/readfic/10244166",
 			},
-			wantBase: "https://archiveofourown.org/works/29288139",
-			wantID:   "29288139",
+			wantBase: "https://ficbook.net/readfic/10244166",
+			wantID:   "10244166",
+			wantErr:  false,
+		},
+		{
+			name: "base with slash at the end",
+			args: args{
+				url: "https://ficbook.net/readfic/10244166/",
+			},
+			wantBase: "https://ficbook.net/readfic/10244166",
+			wantID:   "10244166",
 			wantErr:  false,
 		},
 		{
 			name: "chapter",
 			args: args{
-				url: "https://archiveofourown.org/works/29288139/chapters/71981736",
+				url: "https://ficbook.net/readfic/10244166/26359810#part_content",
 			},
-			wantBase: "https://archiveofourown.org/works/29288139",
-			wantID:   "29288139",
+			wantBase: "https://ficbook.net/readfic/10244166",
+			wantID:   "10244166",
 			wantErr:  false,
 		},
 	}
@@ -88,7 +79,7 @@ func Test_analyze(t *testing.T) {
 				t.Errorf("analyze() gotBase = %v, want %v", gotBase, tt.wantBase)
 			}
 			if gotID != tt.wantID {
-				t.Errorf("analyze() gotName = %v, want %v", gotID, tt.wantID)
+				t.Errorf("analyze() gotId = %v, want %v", gotID, tt.wantID)
 			}
 		})
 	}

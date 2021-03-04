@@ -1,4 +1,4 @@
-package archiveofourown
+package ficbook
 
 import (
 	"fmt"
@@ -24,10 +24,6 @@ func analyze(url string) (base, id string, err error) {
 	return
 }
 
-func readerPageURL(baseURL string, chapterID string) string {
-	return baseURL + "/chapters/" + chapterID
-}
-
 func indexPageURL(baseURL string) string {
-	return baseURL + "/navigate"
+	return baseURL
 }

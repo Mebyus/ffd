@@ -10,4 +10,5 @@ const (
 	ArchiveOfOurOwn      Location = "AO3"
 	QuestionableQuesting Location = "QQ"
 	WebNovel             Location = "WN"
+	FicBook              Location = "FB"
 )

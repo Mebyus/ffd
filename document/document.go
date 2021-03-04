@@ -123,6 +123,17 @@ func GetChildren(node *html.Node) (nodes []*html.Node) {
 	return
 }
 
+func GetFirstChildText(node *html.Node) (text string) {
+	if node == nil {
+		return
+	}
+	child := node.FirstChild
+	if child != nil && child.Type == html.TextNode {
+		text = strings.TrimSpace(child.Data)
+	}
+	return
+}
+
 func extract(attrs []html.Attribute) (id string, classes []string) {
 	for _, attr := range attrs {
 		switch attr.Key {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/mebyus/ffd/resource/archiveofourown"
 	"github.com/mebyus/ffd/resource/fanfiction"
+	"github.com/mebyus/ffd/resource/ficbook"
 	"github.com/mebyus/ffd/resource/fiction"
 	"github.com/mebyus/ffd/resource/royalroad"
 	"github.com/mebyus/ffd/resource/samlib"
@@ -34,6 +35,8 @@ func GetLocationForTarget(target string) (location fic.Location, err error) {
 
 func GetLocationForHostname(hostname string) (location fic.Location, err error) {
 	switch hostname {
+	case ficbook.Hostname:
+		location = fic.FicBook
 	case webnovel.Hostname:
 		location = fic.WebNovel
 	case spacebattles.Hostname:
@@ -77,6 +80,8 @@ func ChooseByID(resourceID string) (t tools, err error) {
 
 func ChooseByHostname(hostname string) (t tools, err error) {
 	switch hostname {
+	case ficbook.Hostname:
+		t = ficbook.NewTools()
 	case webnovel.Hostname:
 		t = webnovel.NewTools()
 	case samlib.Hostname:
@@ -102,6 +107,8 @@ func ChooseByHostname(hostname string) (t tools, err error) {
 func ChooseByLocation(location string) (t tools, err error) {
 	loc := strings.ToUpper(location)
 	switch fic.Location(loc) {
+	case fic.FicBook:
+		t = ficbook.NewTools()
 	case fic.WebNovel:
 		t = webnovel.NewTools()
 	case fic.SpaceBattles:
