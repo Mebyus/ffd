@@ -32,14 +32,14 @@ type settings struct {
 	ClientTimeout time.Duration
 }
 
-func load() (s settings, useDefaults bool, err error) {
+func load() (s settings, execdir string, useDefaults bool, err error) {
 	execpath, err := os.Executable()
 	if err != nil {
 		err = fmt.Errorf("cannot locate executable: %v", err)
 		useDefaults = true
 		return
 	}
-	execdir := filepath.Dir(execpath)
+	execdir = filepath.Dir(execpath)
 	b, err := ioutil.ReadFile(filepath.Join(execdir, defConfigPath))
 	if err != nil {
 		fmt.Printf("couldn't read config file: %v\n", err)
@@ -55,10 +55,13 @@ func load() (s settings, useDefaults bool, err error) {
 }
 
 func Load() {
-	s, useDefaults, err := load()
+	s, execdir, useDefaults, err := load()
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	HistoryPath = filepath.Join(execdir, defHistoryPath)
+
 	if useDefaults {
 		fmt.Println("All settings have been set to default")
 		fmt.Println()
@@ -67,13 +70,13 @@ func Load() {
 
 	insertNewline := false
 	if s.OutDir != "" {
-		OutDir = s.OutDir
+		OutDir = filepath.Join(execdir, s.OutDir)
 	} else {
 		insertNewline = true
 		fmt.Printf("Output directory set to default: %s\n", defOutDir)
 	}
 	if s.SourceSaveDir != "" {
-		SourceSaveDir = s.SourceSaveDir
+		SourceSaveDir = filepath.Join(execdir, s.SourceSaveDir)
 	} else {
 		insertNewline = true
 		fmt.Printf("Source saving directory set to default: %s\n", defSourceSaveDir)
