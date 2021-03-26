@@ -24,6 +24,7 @@ var sem = map[string]func(c *Command) (err error){
 	"tidy":     tidy,
 	"clean":    clean,
 	"bookmark": bookmark,
+	"dest":     dest,
 }
 
 func CreateExecutor(c *Command) (e Executor, err error) {
