@@ -159,6 +159,104 @@ func TestTemplate_Parse(t *testing.T) {
 				ValueFlags: map[string]string{},
 			},
 		},
+		{
+			name: "template with two bool flags, args with this flags",
+			fields: fields{
+				Name: "list",
+				BoolFlags: []BoolFlag{
+					{
+						Flag: Flag{
+							Aliases: map[string]AliasType{
+								"a": SingleChar,
+								"A": SingleChar,
+							},
+						},
+						Default: false,
+					},
+					{
+						Flag: Flag{
+							Aliases: map[string]AliasType{
+								"b": SingleChar,
+								"B": SingleChar,
+								"r": SingleChar,
+							},
+						},
+						Default: false,
+					},
+				},
+			},
+			args: args{
+				args: []string{"-aB"},
+			},
+			wantCommand: &Command{
+				Name:    "list",
+				Targets: []string{},
+				BoolFlags: map[string]bool{
+					"a": true,
+					"A": true,
+					"b": true,
+					"B": true,
+					"r": true,
+				},
+				ValueFlags: map[string]string{},
+			},
+		},
+		{
+			name: "template with one bool flag (two aliases), args with multichar flag",
+			fields: fields{
+				Name: "list",
+				BoolFlags: []BoolFlag{
+					{
+						Flag: Flag{
+							Aliases: map[string]AliasType{
+								"a":   SingleChar,
+								"all": MultipleChars,
+							},
+						},
+						Default: false,
+					},
+				},
+			},
+			args: args{
+				args: []string{"--all"},
+			},
+			wantCommand: &Command{
+				Name:    "list",
+				Targets: []string{},
+				BoolFlags: map[string]bool{
+					"a":   true,
+					"all": true,
+				},
+				ValueFlags: map[string]string{},
+			},
+		},
+		{
+			name: "template with one value flag (one alias)",
+			fields: fields{
+				Name: "download",
+				ValueFlags: []ValueFlag{
+					{
+						Flag: Flag{
+							Aliases: map[string]AliasType{
+								"o": SingleChar,
+							},
+						},
+						Default: "",
+					},
+				},
+			},
+			args: args{
+				args: []string{"-o", "output/dir"},
+			},
+			wantCommand: &Command{
+				Name:      "download",
+				Targets:   []string{},
+				BoolFlags: map[string]bool{},
+				ValueFlags: map[string]string{
+					"o": "output/dir",
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

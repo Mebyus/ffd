@@ -21,3 +21,9 @@ func (c *Command) setBool(flag BoolFlag) {
 		c.BoolFlags[k] = !flag.Default
 	}
 }
+
+func (c *Command) setValue(flag ValueFlag, value string) {
+	for k := range flag.Aliases {
+		c.ValueFlags[k] = value
+	}
+}
