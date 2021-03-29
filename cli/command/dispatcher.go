@@ -1,5 +1,7 @@
 package command
 
+import "fmt"
+
 type Executor interface {
 	Execute(cmd *Command) (err error)
 }
@@ -10,13 +12,18 @@ type pair struct {
 }
 
 type Dispatcher struct {
-	pairs map[string]*pair
+	version fmt.Stringer
+	pairs   map[string]*pair
 }
 
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
 		pairs: make(map[string]*pair),
 	}
+}
+
+func (d *Dispatcher) SetVersion(version fmt.Stringer) {
+	d.version = version
 }
 
 func (d *Dispatcher) Register(template *Template, executor Executor) {
