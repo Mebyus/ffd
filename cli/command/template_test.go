@@ -20,6 +20,7 @@ func TestTemplate_Parse(t *testing.T) {
 		fields      fields
 		args        args
 		wantCommand *Command
+		wantErr     bool
 	}{
 		{
 			name: "template with no flags, nil args",
@@ -35,6 +36,7 @@ func TestTemplate_Parse(t *testing.T) {
 				BoolFlags:  map[string]bool{},
 				ValueFlags: map[string]string{},
 			},
+			wantErr: false,
 		},
 		{
 			name: "template with no flags, one target in args",
@@ -50,6 +52,7 @@ func TestTemplate_Parse(t *testing.T) {
 				BoolFlags:  map[string]bool{},
 				ValueFlags: map[string]string{},
 			},
+			wantErr: false,
 		},
 		{
 			name: "template with one bool flag (one alias), empty args",
@@ -75,6 +78,7 @@ func TestTemplate_Parse(t *testing.T) {
 				BoolFlags:  map[string]bool{},
 				ValueFlags: map[string]string{},
 			},
+			wantErr: false,
 		},
 		{
 			name: "template with one bool flag (one alias), args with this flag",
@@ -102,6 +106,7 @@ func TestTemplate_Parse(t *testing.T) {
 				},
 				ValueFlags: map[string]string{},
 			},
+			wantErr: false,
 		},
 		{
 			name: "template with one bool flag (one alias and default = true), args with this flag",
@@ -129,6 +134,7 @@ func TestTemplate_Parse(t *testing.T) {
 				},
 				ValueFlags: map[string]string{},
 			},
+			wantErr: false,
 		},
 		{
 			name: "template with one bool flag (two aliases), args with this flag",
@@ -158,6 +164,7 @@ func TestTemplate_Parse(t *testing.T) {
 				},
 				ValueFlags: map[string]string{},
 			},
+			wantErr: false,
 		},
 		{
 			name: "template with two bool flags, args with this flags",
@@ -200,6 +207,7 @@ func TestTemplate_Parse(t *testing.T) {
 				},
 				ValueFlags: map[string]string{},
 			},
+			wantErr: false,
 		},
 		{
 			name: "template with one bool flag (two aliases), args with multichar flag",
@@ -229,6 +237,7 @@ func TestTemplate_Parse(t *testing.T) {
 				},
 				ValueFlags: map[string]string{},
 			},
+			wantErr: false,
 		},
 		{
 			name: "template with one value flag (one alias)",
@@ -256,6 +265,7 @@ func TestTemplate_Parse(t *testing.T) {
 					"o": "output/dir",
 				},
 			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -266,7 +276,17 @@ func TestTemplate_Parse(t *testing.T) {
 				BoolFlags:   tt.fields.BoolFlags,
 				ValueFlags:  tt.fields.ValueFlags,
 			}
-			if gotCommand := tr.Parse(tt.args.args); !reflect.DeepEqual(gotCommand, tt.wantCommand) {
+			err := tr.prepare()
+			if err != nil {
+				t.Errorf("Template.prepare() error = %v", err)
+				return
+			}
+			gotCommand, err := tr.Parse(tt.args.args)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Template.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotCommand, tt.wantCommand) {
 				t.Errorf("Template.Parse() = %v, want %v", gotCommand, tt.wantCommand)
 			}
 		})

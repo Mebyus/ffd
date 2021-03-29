@@ -27,9 +27,29 @@ func (d *Dispatcher) Register(template *Template, executor Executor) {
 }
 
 func (d *Dispatcher) Dispatch(args []string) (err error) {
-	pair := d.pairs[args[0]]
-	command := pair.template.Parse(args)
+	isHelp, helpArgs := isHelpCommand(args)
+	if isHelp {
+		d.displayHelp(helpArgs)
+		return
+	}
+	if isVersionCommand(args) {
+		d.displayVersion()
+		return
+	}
+	pair, ok := d.pairs[args[0]]
+	if !ok {
+		d.displayCommandNotFound(args[0])
+		return
+	}
+	command, err := pair.template.Parse(args)
+	if err != nil {
+		d.displayTemplateParseError(pair.template.Name, err)
+		return
+	}
 	err = pair.executor.Execute(command)
+	if err != nil {
+		d.displayCommandExecutionError(command.Name, err)
+	}
 	return
 }
 

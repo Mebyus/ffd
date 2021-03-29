@@ -1,6 +1,9 @@
 package command
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type AliasType uint8
 type flagKind uint8
@@ -51,37 +54,60 @@ func (t *Template) prepare() (err error) {
 	for index, flag := range t.BoolFlags {
 		l := link{kind: boolFlag, index: index}
 		for k := range flag.Aliases {
+			if strings.HasPrefix(k, "-") {
+				err = fmt.Errorf("bool flag alias [ %s ] cannot start with prefix", k)
+				return
+			}
+			_, ok := t.flags[k]
+			if ok {
+				err = fmt.Errorf("multiple occurences of [ %s ] alias", k)
+				return
+			}
 			t.flags[k] = l
 		}
 	}
 	for index, flag := range t.ValueFlags {
 		l := link{kind: valueFlag, index: index}
 		for k := range flag.Aliases {
+			if strings.HasPrefix(k, "-") {
+				err = fmt.Errorf("value flag alias [ %s ] cannot start with prefix", k)
+				return
+			}
+			_, ok := t.flags[k]
+			if ok {
+				err = fmt.Errorf("multiple occurences of [ %s ] alias", k)
+				return
+			}
 			t.flags[k] = l
 		}
 	}
 	return
 }
 
-// func (t *Template) getFlagLink(flag string) (l link, ok bool) {
-
-// }
-
-func (t *Template) Parse(args []string) (command *Command) {
-	_ = t.prepare()
+func (t *Template) Parse(args []string) (command *Command, err error) {
 	command = NewCommand(t.Name)
-	tp := parser{template: t, command: command}
-	more := false
+	tp := &parser{template: t, command: command}
 	for _, arg := range args {
-		if strings.HasPrefix(arg, "-") {
-			flag := strings.TrimPrefix(arg, "-")
-			more = tp.parseFlag(flag)
+		err = tp.parseNext(arg)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+func (p *parser) parseNext(arg string) (err error) {
+	if strings.HasPrefix(arg, "-") {
+		flag := strings.TrimPrefix(arg, "-")
+		p.more, err = p.parseFlag(flag)
+		if err != nil {
+			return
+		}
+	} else {
+		if p.more {
+			p.parseValue(arg)
 		} else {
-			if more {
-				tp.parseValue(arg)
-			} else {
-				command.Targets = append(command.Targets, arg)
-			}
+			p.command.Targets = append(p.command.Targets, arg)
 		}
 	}
 	return

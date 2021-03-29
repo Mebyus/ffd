@@ -6,11 +6,12 @@ type parser struct {
 	template *Template
 	command  *Command
 	lastLink link
+	more     bool
 }
 
-func (p *parser) parseFlag(flag string) (more bool) {
+func (p *parser) parseFlag(flag string) (more bool, err error) {
 	if strings.HasPrefix(flag, "-") {
-		more = p.parseMultiCharFlag(strings.TrimPrefix(flag, "-"))
+		more, err = p.parseMultiCharFlag(strings.TrimPrefix(flag, "-"))
 	} else {
 		if len(flag) == 1 {
 			more = p.parseSingleCharFlag(flag)
@@ -41,7 +42,7 @@ func (p *parser) parseSingleCharFlag(flag string) (more bool) {
 	return
 }
 
-func (p *parser) parseMultiCharFlag(flag string) (more bool) {
+func (p *parser) parseMultiCharFlag(flag string) (more bool, err error) {
 	l, ok := p.template.flags[flag]
 	if ok {
 		if l.kind == boolFlag {
