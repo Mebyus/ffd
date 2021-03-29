@@ -15,3 +15,7 @@ func Dispatch(args []string) (err error) {
 func SetVersion(version fmt.Stringer) {
 	stdDispatcher.SetVersion(version)
 }
+
+func SetStringVersion(version string) {
+	stdDispatcher.SetStringVersion(version)
+}

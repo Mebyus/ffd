@@ -8,9 +8,9 @@ func isVersionCommand(args []string) (isVersion bool) {
 }
 
 func (d *Dispatcher) displayVersion() {
-	if d.version == nil {
+	if d.version == "" {
 		fmt.Println("version information is not available")
 		return
 	}
-	fmt.Println(d.version.String())
+	fmt.Println(d.version)
 }

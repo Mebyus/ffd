@@ -15,7 +15,7 @@ type pair struct {
 }
 
 type Dispatcher struct {
-	version fmt.Stringer
+	version string
 	pairs   map[string]*pair
 }
 
@@ -26,7 +26,7 @@ func NewDispatcher() *Dispatcher {
 }
 
 func (d *Dispatcher) SetVersion(version fmt.Stringer) {
-	d.version = version
+	d.version = version.String()
 }
 
 func (d *Dispatcher) Register(template *Template, executor Executor) {
@@ -73,6 +73,6 @@ func (d *Dispatcher) Dispatch(args []string) (err error) {
 	return
 }
 
-func (d *Dispatcher) Describe(name string) (description string) {
-	return
+func (d *Dispatcher) SetStringVersion(version string) {
+	d.version = version
 }
