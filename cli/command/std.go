@@ -1,5 +1,7 @@
 package command
 
+import "fmt"
+
 var stdDispatcher = NewDispatcher()
 
 func Register(template *Template, executor Executor) {
@@ -10,6 +12,6 @@ func Dispatch(args []string) (err error) {
 	return stdDispatcher.Dispatch(args)
 }
 
-func init() {
-	// Register(NewStdHelpTemplate(), NewStdHelper())
+func SetVersion(version fmt.Stringer) {
+	stdDispatcher.SetVersion(version)
 }
