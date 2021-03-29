@@ -1,6 +1,9 @@
 package command
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 type Executor interface {
 	Execute(cmd *Command) (err error)
@@ -27,6 +30,16 @@ func (d *Dispatcher) SetVersion(version fmt.Stringer) {
 }
 
 func (d *Dispatcher) Register(template *Template, executor Executor) {
+	err := template.prepare()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, ok := d.pairs[template.Name]
+	if ok {
+		fmt.Printf("template [ %s ] already registered\n", template.Name)
+		os.Exit(1)
+	}
 	d.pairs[template.Name] = &pair{
 		template: template,
 		executor: executor,
