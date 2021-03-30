@@ -20,6 +20,7 @@ func TestTemplate_Parse(t *testing.T) {
 		fields      fields
 		args        args
 		wantCommand *Command
+		wantPrepErr bool
 		wantErr     bool
 	}{
 		{
@@ -36,7 +37,8 @@ func TestTemplate_Parse(t *testing.T) {
 				BoolFlags:  map[string]bool{},
 				ValueFlags: map[string]string{},
 			},
-			wantErr: false,
+			wantPrepErr: false,
+			wantErr:     false,
 		},
 		{
 			name: "template with no flags, one target in args",
@@ -52,7 +54,8 @@ func TestTemplate_Parse(t *testing.T) {
 				BoolFlags:  map[string]bool{},
 				ValueFlags: map[string]string{},
 			},
-			wantErr: false,
+			wantPrepErr: false,
+			wantErr:     false,
 		},
 		{
 			name: "template with one bool flag (one alias), empty args",
@@ -78,7 +81,8 @@ func TestTemplate_Parse(t *testing.T) {
 				BoolFlags:  map[string]bool{},
 				ValueFlags: map[string]string{},
 			},
-			wantErr: false,
+			wantPrepErr: false,
+			wantErr:     false,
 		},
 		{
 			name: "template with one bool flag (one alias), args with this flag",
@@ -106,7 +110,8 @@ func TestTemplate_Parse(t *testing.T) {
 				},
 				ValueFlags: map[string]string{},
 			},
-			wantErr: false,
+			wantPrepErr: false,
+			wantErr:     false,
 		},
 		{
 			name: "template with one bool flag (one alias and default = true), args with this flag",
@@ -134,7 +139,8 @@ func TestTemplate_Parse(t *testing.T) {
 				},
 				ValueFlags: map[string]string{},
 			},
-			wantErr: false,
+			wantPrepErr: false,
+			wantErr:     false,
 		},
 		{
 			name: "template with one bool flag (two aliases), args with this flag",
@@ -164,7 +170,8 @@ func TestTemplate_Parse(t *testing.T) {
 				},
 				ValueFlags: map[string]string{},
 			},
-			wantErr: false,
+			wantPrepErr: false,
+			wantErr:     false,
 		},
 		{
 			name: "template with two bool flags, args with this flags",
@@ -207,7 +214,8 @@ func TestTemplate_Parse(t *testing.T) {
 				},
 				ValueFlags: map[string]string{},
 			},
-			wantErr: false,
+			wantPrepErr: false,
+			wantErr:     false,
 		},
 		{
 			name: "template with one bool flag (two aliases), args with multichar flag",
@@ -237,7 +245,8 @@ func TestTemplate_Parse(t *testing.T) {
 				},
 				ValueFlags: map[string]string{},
 			},
-			wantErr: false,
+			wantPrepErr: false,
+			wantErr:     false,
 		},
 		{
 			name: "template with one value flag (one alias)",
@@ -265,7 +274,8 @@ func TestTemplate_Parse(t *testing.T) {
 					"o": "output/dir",
 				},
 			},
-			wantErr: false,
+			wantPrepErr: false,
+			wantErr:     false,
 		},
 	}
 	for _, tt := range tests {
@@ -277,8 +287,8 @@ func TestTemplate_Parse(t *testing.T) {
 				ValueFlags:  tt.fields.ValueFlags,
 			}
 			err := tr.prepare()
-			if err != nil {
-				t.Errorf("Template.prepare() error = %v", err)
+			if (err != nil) != tt.wantPrepErr {
+				t.Errorf("Template.prepare() error = %v, wantPrepErr %v", err, tt.wantPrepErr)
 				return
 			}
 			gotCommand, err := tr.Parse(tt.args.args)
