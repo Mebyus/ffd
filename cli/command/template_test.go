@@ -335,6 +335,62 @@ func TestTemplate_Parse(t *testing.T) {
 			wantPrepErr: false,
 			wantErr:     false,
 		},
+		{
+			name: "realistic download command with defaults",
+			fields: fields{
+				Name: "download",
+				ValueFlags: []ValueFlag{
+					{
+						Flag: Flag{
+							Aliases: map[string]AliasType{
+								"o":   SingleChar,
+								"out": MultipleChars,
+							},
+						},
+						Default: "output",
+					},
+					{
+						Flag: Flag{
+							Aliases: map[string]AliasType{
+								"f":      SingleChar,
+								"format": MultipleChars,
+							},
+						},
+						Default: "txt",
+					},
+				},
+				BoolFlags: []BoolFlag{
+					{
+						Flag: Flag{
+							Aliases: map[string]AliasType{
+								"s":           SingleChar,
+								"save-source": MultipleChars,
+							},
+						},
+						Default: true,
+					},
+				},
+			},
+			args: args{
+				args: []string{"--format", "fb2", "https://archiveofourown.org/works/29288139"},
+			},
+			wantCommand: &Command{
+				Name:    "download",
+				Targets: []string{"https://archiveofourown.org/works/29288139"},
+				BoolFlags: map[string]bool{
+					"s":           true,
+					"save-source": true,
+				},
+				ValueFlags: map[string]string{
+					"o":      "output",
+					"out":    "output",
+					"f":      "fb2",
+					"format": "fb2",
+				},
+			},
+			wantPrepErr: false,
+			wantErr:     false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -61,7 +61,7 @@ func (d *Dispatcher) Dispatch(args []string) (err error) {
 		d.displayCommandNotFound(args[0])
 		return
 	}
-	command, err := pair.template.Parse(args)
+	command, err := pair.template.Parse(args[1:])
 	if err != nil {
 		d.displayTemplateParseError(pair.template.Name, err)
 		return

@@ -86,13 +86,14 @@ func (t *Template) prepare() (err error) {
 
 func (t *Template) Parse(args []string) (command *Command, err error) {
 	command = NewCommand(t.Name)
-	tp := &parser{template: t, command: command}
+	tp := newParser(t, command)
 	for _, arg := range args {
 		err = tp.parseNext(arg)
 		if err != nil {
 			return
 		}
 	}
+	tp.setDefaults()
 	return
 }
 
