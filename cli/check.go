@@ -5,6 +5,12 @@ import (
 	"github.com/mebyus/ffd/track"
 )
 
+type checkExecutor struct{}
+
+func NewCheckExecutor() *checkExecutor {
+	return &checkExecutor{}
+}
+
 func NewCheckTemplate() (template *command.Template) {
 	template = &command.Template{
 		Name: "check",
@@ -23,11 +29,12 @@ func NewCheckTemplate() (template *command.Template) {
 	return
 }
 
-func check(c *Command) error {
-	trackpath := c.Flags["track"]
-	err := track.Check(trackpath, c.Target)
-	if err != nil {
-		return err
+func (e *checkExecutor) Execute(cmd *command.Command) (err error) {
+	target := ""
+	if len(cmd.Targets) > 0 {
+		target = cmd.Targets[0]
 	}
-	return nil
+	trackpath := cmd.ValueFlags["track"]
+	err = track.Check(trackpath, target)
+	return
 }

@@ -3,11 +3,18 @@ package cli
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/mebyus/ffd/cli/command"
 	"github.com/mebyus/ffd/resource"
 	"github.com/mebyus/ffd/resource/fiction"
 )
+
+type parseExecutor struct{}
+
+func NewParseExecutor() *parseExecutor {
+	return &parseExecutor{}
+}
 
 func NewParseTemplate() (template *command.Template) {
 	template = &command.Template{
@@ -48,23 +55,17 @@ func NewParseTemplate() (template *command.Template) {
 	return
 }
 
-func parse(c *Command) (err error) {
-	resourceID := c.Flags["resource"]
+func (e *parseExecutor) Execute(cmd *command.Command) (err error) {
+	resourceID := cmd.ValueFlags["resource"]
 	if resourceID == "" {
-		resourceID = c.Flags["res"]
+		return fmt.Errorf("resource is not specified")
 	}
-	if resourceID == "" {
-		return fmt.Errorf("\"parse\" command: resource is not specified")
-	}
-	format := fiction.RenderFormat(c.Flags["format"])
-	if format == "" {
-		format = fiction.TXT
-	}
-	_, separate := c.Flags["s"]
-	if c.Target == "" {
+	format := fiction.RenderFormat(strings.ToUpper(cmd.ValueFlags["format"]))
+	separate := cmd.BoolFlags["separate"]
+	if len(cmd.Targets) == 0 {
 		err = resource.ParseReader(os.Stdin, resourceID, format)
 	} else {
-		err = resource.Parse(c.Target, resourceID, separate, format)
+		err = resource.Parse(cmd.Targets[0], resourceID, separate, format)
 	}
 	return
 }

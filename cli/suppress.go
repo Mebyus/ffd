@@ -7,6 +7,12 @@ import (
 	"github.com/mebyus/ffd/track"
 )
 
+type suppressExecutor struct{}
+
+func NewSuppressExecutor() *suppressExecutor {
+	return &suppressExecutor{}
+}
+
 func NewSuppressTemplate() (template *command.Template) {
 	template = &command.Template{
 		Name: "suppress",
@@ -36,15 +42,12 @@ func NewSuppressTemplate() (template *command.Template) {
 	return
 }
 
-func suppress(c *Command) (err error) {
-	if c.Target == "" {
-		return fmt.Errorf("\"suppress\" command: target is not specified")
+func (e *suppressExecutor) Execute(cmd *command.Command) (err error) {
+	if len(cmd.Targets) == 0 {
+		return fmt.Errorf("target is not specified")
 	}
-	_, resume := c.Flags["r"]
-	trackpath := c.Flags["track"]
-	err = track.Suppress(c.Target, trackpath, resume)
-	if err != nil {
-		return
-	}
+	resume := cmd.BoolFlags["resume"]
+	trackpath := cmd.ValueFlags["track"]
+	err = track.Suppress(cmd.Targets[0], trackpath, resume)
 	return
 }

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/mebyus/ffd/cli"
-	"github.com/mebyus/ffd/planner"
+	"github.com/mebyus/ffd/cli/command"
 	"github.com/mebyus/ffd/setting"
 )
 
@@ -14,21 +14,21 @@ func main() {
 		fmt.Println("no args to process")
 		return
 	}
-	command := cli.Parse(os.Args[1:])
-
-	executor, err := cli.CreateExecutor(command)
+	setting.Load()
+	command.Register(cli.NewAddTemplate(), cli.NewAddExecutor())
+	command.Register(cli.NewBookmarkTemplate(), cli.NewBookmarkExecutor())
+	command.Register(cli.NewCheckTemplate(), cli.NewCheckExecutor())
+	command.Register(cli.NewCleanTemplate(), cli.NewCleanExecutor())
+	command.Register(cli.NewDestTemplate(), cli.NewDestExecutor())
+	command.Register(cli.NewDownloadTemplate(), cli.NewDownloadExecutor())
+	command.Register(cli.NewListTemplate(), cli.NewListExecutor())
+	command.Register(cli.NewParseTemplate(), cli.NewParseExecutor())
+	command.Register(cli.NewRemoveTemplate(), cli.NewRemoveExecutor())
+	command.Register(cli.NewSuppressTemplate(), cli.NewSuppressExecutor())
+	command.Register(cli.NewTidyTemplate(), cli.NewTidyExecutor())
+	err := command.Dispatch(os.Args[1:])
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
-	setting.Load()
-	go planner.Planner()
-	err = executor.Execute()
-	if err != nil {
-		fmt.Printf("Command execution: %v\n", err)
-		return
-	}
-
-	return
 }

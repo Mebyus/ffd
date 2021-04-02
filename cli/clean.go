@@ -5,6 +5,12 @@ import (
 	"github.com/mebyus/ffd/resource"
 )
 
+type cleanExecutor struct{}
+
+func NewCleanExecutor() *cleanExecutor {
+	return &cleanExecutor{}
+}
+
 func NewCleanTemplate() (template *command.Template) {
 	template = &command.Template{
 		Name: "clean",
@@ -32,12 +38,9 @@ func NewCleanTemplate() (template *command.Template) {
 	return
 }
 
-func clean(c *Command) (err error) {
-	_, cleanHistory := c.Flags["h"]
-	_, cleanSource := c.Flags["s"]
+func (e *cleanExecutor) Execute(cmd *command.Command) (err error) {
+	cleanHistory := cmd.BoolFlags["history"]
+	cleanSource := cmd.BoolFlags["source"]
 	err = resource.Clean(cleanHistory, cleanSource)
-	if err != nil {
-		return
-	}
 	return
 }

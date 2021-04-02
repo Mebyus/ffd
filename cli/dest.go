@@ -6,6 +6,12 @@ import (
 	"github.com/mebyus/ffd/setting"
 )
 
+type destExecutor struct{}
+
+func NewDestExecutor() *destExecutor {
+	return &destExecutor{}
+}
+
 func NewDestTemplate() (template *command.Template) {
 	template = &command.Template{
 		Name: "dest",
@@ -13,11 +19,8 @@ func NewDestTemplate() (template *command.Template) {
 	return
 }
 
-func dest(c *Command) (err error) {
+func (e *destExecutor) Execute(cmd *command.Command) (err error) {
 	downloadDir := setting.OutDir
 	err = open.Start(downloadDir)
-	if err != nil {
-		return
-	}
 	return
 }

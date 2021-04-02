@@ -1,9 +1,17 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/mebyus/ffd/cli/command"
 	"github.com/mebyus/ffd/track"
 )
+
+type bookmarkExecutor struct{}
+
+func NewBookmarkExecutor() *bookmarkExecutor {
+	return &bookmarkExecutor{}
+}
 
 func NewBookmarkTemplate() (template *command.Template) {
 	template = &command.Template{
@@ -32,15 +40,12 @@ func NewBookmarkTemplate() (template *command.Template) {
 	return
 }
 
-func bookmark(c *Command) error {
-	trackpath := c.Flags["track"]
-	chapter, ok := c.Flags["chapter"]
-	if !ok {
-		chapter = "latest"
+func (e *bookmarkExecutor) Execute(cmd *command.Command) (err error) {
+	if len(cmd.Targets) == 0 {
+		return fmt.Errorf("target is not specified")
 	}
-	err := track.Bookmark(trackpath, c.Target, chapter)
-	if err != nil {
-		return err
-	}
-	return nil
+	trackpath := cmd.ValueFlags["track"]
+	chapter := cmd.ValueFlags["chapter"]
+	err = track.Bookmark(trackpath, cmd.Targets[0], chapter)
+	return
 }

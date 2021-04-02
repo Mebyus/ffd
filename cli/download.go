@@ -9,6 +9,12 @@ import (
 	"github.com/mebyus/ffd/resource/fiction"
 )
 
+type downloadExecutor struct{}
+
+func NewDownloadExecutor() *downloadExecutor {
+	return &downloadExecutor{}
+}
+
 func NewDownloadTemplate() (template *command.Template) {
 	template = &command.Template{
 		Name: "download",
@@ -47,18 +53,12 @@ func NewDownloadTemplate() (template *command.Template) {
 	return
 }
 
-func download(c *Command) (err error) {
-	if c.Target == "" {
-		return fmt.Errorf("\"download\" command: target is not specified")
+func (e *downloadExecutor) Execute(cmd *command.Command) (err error) {
+	if len(cmd.Targets) == 0 {
+		return fmt.Errorf("target is not specified")
 	}
-	_, save := c.Flags["s"]
-	format := fiction.RenderFormat(strings.ToUpper(c.Flags["format"]))
-	if format == "" {
-		format = fiction.TXT
-	}
-	err = resource.Download(c.Target, save, format)
-	if err != nil {
-		return
-	}
+	saveSource := cmd.BoolFlags["save-source"]
+	format := fiction.RenderFormat(strings.ToUpper(cmd.ValueFlags["format"]))
+	err = resource.Download(cmd.Targets[0], saveSource, format)
 	return
 }

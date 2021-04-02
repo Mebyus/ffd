@@ -5,6 +5,12 @@ import (
 	"github.com/mebyus/ffd/track"
 )
 
+type tidyExecutor struct{}
+
+func NewTidyExecutor() *tidyExecutor {
+	return &tidyExecutor{}
+}
+
 func NewTidyTemplate() (template *command.Template) {
 	template = &command.Template{
 		Name: "tidy",
@@ -43,13 +49,10 @@ func NewTidyTemplate() (template *command.Template) {
 	return
 }
 
-func tidy(c *Command) (err error) {
-	trackpath := c.Flags["track"]
-	_, cleanChapters := c.Flags["chapters"]
-	_, cleanUpdates := c.Flags["updates"]
+func (e *tidyExecutor) Execute(cmd *command.Command) (err error) {
+	trackpath := cmd.ValueFlags["track"]
+	cleanChapters := cmd.BoolFlags["chapters"]
+	cleanUpdates := cmd.BoolFlags["updates"]
 	err = track.Tidy(trackpath, cleanChapters, cleanUpdates)
-	if err != nil {
-		return
-	}
 	return
 }

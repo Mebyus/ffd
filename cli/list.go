@@ -5,6 +5,12 @@ import (
 	"github.com/mebyus/ffd/track"
 )
 
+type listExecutor struct{}
+
+func NewListExecutor() *listExecutor {
+	return &listExecutor{}
+}
+
 func NewListTemplate() (template *command.Template) {
 	template = &command.Template{
 		Name: "list",
@@ -23,11 +29,12 @@ func NewListTemplate() (template *command.Template) {
 	return
 }
 
-func list(c *Command) (err error) {
-	trackpath := c.Flags["track"]
-	err = track.List(trackpath, c.Target)
-	if err != nil {
-		return err
+func (e *listExecutor) Execute(cmd *command.Command) (err error) {
+	target := ""
+	if len(cmd.Targets) > 0 {
+		target = cmd.Targets[0]
 	}
+	trackpath := cmd.ValueFlags["track"]
+	err = track.List(trackpath, target)
 	return
 }
