@@ -50,6 +50,18 @@ type Template struct {
 }
 
 func (t *Template) prepare() (err error) {
+	if t.Name == "" {
+		err = fmt.Errorf("command must have a non-empty name")
+		return
+	}
+	if strings.HasPrefix(t.Name, "-") {
+		err = fmt.Errorf("command name [ %s ] cannot start with \"-\"", t.Name)
+		return
+	}
+	if t.Name == "help" || t.Name == "version" {
+		err = fmt.Errorf("command name [ %s ] is reserved", t.Name)
+		return
+	}
 	t.flags = map[string]link{}
 	for index, flag := range t.BoolFlags {
 		l := link{kind: boolFlag, index: index}

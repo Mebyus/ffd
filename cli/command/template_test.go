@@ -391,6 +391,41 @@ func TestTemplate_Parse(t *testing.T) {
 			wantPrepErr: false,
 			wantErr:     false,
 		},
+		{
+			name: "template with empty name",
+			fields: fields{
+				Name: "",
+			},
+			wantPrepErr: true,
+		},
+		{
+			name: "template with \"help\" name",
+			fields: fields{
+				Name: "help",
+			},
+			wantPrepErr: true,
+		},
+		{
+			name: "template with \"version\" name",
+			fields: fields{
+				Name: "version",
+			},
+			wantPrepErr: true,
+		},
+		{
+			name: "template with name that starts with \"-\"",
+			fields: fields{
+				Name: "-command",
+			},
+			wantPrepErr: true,
+		},
+		{
+			name: "template with double hyphen name",
+			fields: fields{
+				Name: "--",
+			},
+			wantPrepErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -403,6 +438,11 @@ func TestTemplate_Parse(t *testing.T) {
 			err := tr.prepare()
 			if (err != nil) != tt.wantPrepErr {
 				t.Errorf("Template.prepare() error = %v, wantPrepErr %v", err, tt.wantPrepErr)
+				return
+			}
+			if err != nil {
+				// template is broken. parse checks are pointless
+				// and could lead to dirty results
 				return
 			}
 			gotCommand, err := tr.Parse(tt.args.args)
