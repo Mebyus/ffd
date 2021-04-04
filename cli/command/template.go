@@ -40,13 +40,22 @@ type link struct {
 	index int
 }
 
+type Description struct {
+	Short string
+	Long  string
+}
+
 type Template struct {
 	Name        string
-	Description string
+	Description Description
 	BoolFlags   []BoolFlag
 	ValueFlags  []ValueFlag
 
 	flags map[string]link
+}
+
+func (t *Template) displayHelp() {
+	fmt.Println(t.Description.Long)
 }
 
 func (t *Template) prepare() (err error) {

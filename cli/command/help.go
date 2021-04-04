@@ -16,8 +16,26 @@ func isHelpCommand(args []string) (isHelp bool, helpArgs []string) {
 	return
 }
 
-func (d *Dispatcher) displayHelp(args []string) {
+func (d *Dispatcher) displayGeneralHelp() {
+	for _, pair := range d.pairs {
+		fmt.Printf("%s - %s\n", pair.template.Name, pair.template.Description.Short)
+	}
+}
 
+func (d *Dispatcher) displayCommandHelp(name string) {
+	pair, ok := d.pairs[name]
+	if !ok {
+		d.displayGeneralHelp()
+		return
+	}
+	pair.template.displayHelp()
+}
+
+func (d *Dispatcher) displayHelp(args []string) {
+	if len(args) == 0 {
+		d.displayGeneralHelp()
+	}
+	d.displayCommandHelp(args[0])
 }
 
 func (d *Dispatcher) displayCommandNotFound(name string) {

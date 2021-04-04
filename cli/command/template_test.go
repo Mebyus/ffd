@@ -8,7 +8,7 @@ import (
 func TestTemplate_Parse(t *testing.T) {
 	type fields struct {
 		Name        string
-		Description string
+		Description Description
 		BoolFlags   []BoolFlag
 		ValueFlags  []ValueFlag
 	}
