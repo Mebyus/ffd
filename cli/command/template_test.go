@@ -426,6 +426,60 @@ func TestTemplate_Parse(t *testing.T) {
 			},
 			wantPrepErr: true,
 		},
+		{
+			name: "value flag via equal sign",
+			fields: fields{
+				Name: "download",
+				ValueFlags: []ValueFlag{
+					{
+						Flag: Flag{
+							Aliases: map[string]AliasType{
+								"o":   SingleChar,
+								"out": MultipleChars,
+							},
+						},
+						Default: "",
+					},
+					{
+						Flag: Flag{
+							Aliases: map[string]AliasType{
+								"f":      SingleChar,
+								"format": MultipleChars,
+							},
+						},
+						Default: "txt",
+					},
+				},
+				BoolFlags: []BoolFlag{
+					{
+						Flag: Flag{
+							Aliases: map[string]AliasType{
+								"s":           SingleChar,
+								"save-source": MultipleChars,
+							},
+						},
+						Default: false,
+					},
+				},
+			},
+			args: args{
+				args: []string{"--format=fb2", "-s", "https://archiveofourown.org/works/29288139"},
+			},
+			wantCommand: &Command{
+				Name:    "download",
+				Targets: []string{"https://archiveofourown.org/works/29288139"},
+				BoolFlags: map[string]bool{
+					"s":           true,
+					"save-source": true,
+				},
+				ValueFlags: map[string]string{
+					"f":      "fb2",
+					"format": "fb2",
+				},
+			},
+			wantPrepErr: false,
+			wantErr:     false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

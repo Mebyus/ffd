@@ -1,6 +1,9 @@
 package command
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type parser struct {
 	template      *Template
@@ -20,12 +23,12 @@ func newParser(template *Template, command *Command) *parser {
 	}
 }
 
-func (p *parser) parseFlag(flag string) (more bool, err error) {
+func (p *parser) parseFlag(flag string) (err error) {
 	if strings.HasPrefix(flag, "-") {
-		more, err = p.parseMultiCharFlag(strings.TrimPrefix(flag, "-"))
+		p.more, err = p.parseMultiCharFlag(strings.TrimPrefix(flag, "-"))
 	} else {
 		if len(flag) == 1 {
-			more = p.parseSingleCharFlag(flag)
+			p.more = p.parseSingleCharFlag(flag)
 		} else {
 			p.parseSetOfSingleCharFlags(flag)
 		}
@@ -54,7 +57,32 @@ func (p *parser) parseSingleCharFlag(flag string) (more bool) {
 	return
 }
 
+func (p *parser) parseValueEqualFlag(flagAndValue string) (err error) {
+	split := strings.SplitN(flagAndValue, "=", 2)
+	flag := split[0]
+	value := split[1]
+	if value == "" {
+		err = fmt.Errorf("cannot set empty value for [ %s ] flag", flag)
+		return
+	}
+	l, ok := p.template.flags[flag]
+	if ok {
+		if l.kind == boolFlag {
+			err = fmt.Errorf("cannot set custom value for boolean flag")
+			return
+		} else if l.kind == valueFlag {
+			p.command.setValue(p.template.ValueFlags[l.index], value)
+			p.valueFlagUsed[l.index] = true
+		}
+	}
+	return
+}
+
 func (p *parser) parseMultiCharFlag(flag string) (more bool, err error) {
+	if strings.Contains(flag, "=") {
+		err = p.parseValueEqualFlag(flag)
+		return
+	}
 	l, ok := p.template.flags[flag]
 	if ok {
 		if l.kind == boolFlag {

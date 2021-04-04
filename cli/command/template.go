@@ -112,7 +112,7 @@ func (t *Template) Parse(args []string) (command *Command, err error) {
 func (p *parser) parseNext(arg string) (err error) {
 	if strings.HasPrefix(arg, "-") {
 		flag := strings.TrimPrefix(arg, "-")
-		p.more, err = p.parseFlag(flag)
+		err = p.parseFlag(flag)
 		if err != nil {
 			return
 		}
