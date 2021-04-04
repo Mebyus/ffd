@@ -102,7 +102,8 @@ func checkAll(trackpath string) (err error) {
 		}
 		updated, err := update(f)
 		if err != nil {
-			return err
+			fmt.Println(err)
+			continue
 		}
 		if updated {
 			updatedMessages = append(updatedMessages, updatedMsg(f, i+1))
