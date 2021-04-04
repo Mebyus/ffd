@@ -18,7 +18,7 @@ func isHelpCommand(args []string) (isHelp bool, helpArgs []string) {
 
 func (d *Dispatcher) displayGeneralHelp() {
 	for _, pair := range d.pairs {
-		fmt.Printf("%s - %s\n", pair.template.Name, pair.template.Description.Short)
+		fmt.Printf("    %s    %s\n", pair.template.Name, pair.template.Description.Short)
 	}
 }
 
@@ -34,6 +34,7 @@ func (d *Dispatcher) displayCommandHelp(name string) {
 func (d *Dispatcher) displayHelp(args []string) {
 	if len(args) == 0 {
 		d.displayGeneralHelp()
+		return
 	}
 	d.displayCommandHelp(args[0])
 }
