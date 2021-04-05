@@ -12,7 +12,6 @@ import (
 func (t *rrTools) Check(target string) (info *fic.Info, err error) {
 	baseURL, _, err := analyze(target)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 
@@ -20,7 +19,7 @@ func (t *rrTools) Check(target string) (info *fic.Info, err error) {
 	start := time.Now()
 	indexPage, err := cmn.GetBody(baseURL, planner.Client)
 	if err != nil {
-		fmt.Printf("\n%v\n", err)
+		fmt.Printf("\n")
 		return
 	}
 	fmt.Printf(" [ OK ] %v\n", time.Since(start))

@@ -17,7 +17,6 @@ import (
 func (t *sbTools) Check(target string) (info *fic.Info, err error) {
 	baseURL, _, id, err := analyze(target)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 
@@ -25,7 +24,7 @@ func (t *sbTools) Check(target string) (info *fic.Info, err error) {
 	start := time.Now()
 	indexPage, err := cmn.GetBody(indexPageURL(baseURL), planner.Client)
 	if err != nil {
-		fmt.Printf("\n%v\n", err)
+		fmt.Printf("\n")
 		return
 	}
 	fmt.Printf(" [ OK ] %v\n", time.Since(start))
