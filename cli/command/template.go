@@ -47,6 +47,7 @@ type Description struct {
 
 type Template struct {
 	Name        string
+	Usage       string
 	Description Description
 	BoolFlags   []BoolFlag
 	ValueFlags  []ValueFlag
@@ -54,7 +55,8 @@ type Template struct {
 	flags map[string]link
 }
 
-func (t *Template) displayHelp() {
+func (t *Template) displayHelp(programName string) {
+	fmt.Printf("Usage: %s %s %s\n\n", programName, t.Name, t.Usage)
 	fmt.Println(t.Description.Long)
 }
 

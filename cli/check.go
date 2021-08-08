@@ -14,6 +14,9 @@ func NewCheckExecutor() *checkExecutor {
 func NewCheckTemplate() (template *command.Template) {
 	template = &command.Template{
 		Name: "check",
+		Description: command.Description{
+			Short: "check for fic updates in your library",
+		},
 		ValueFlags: []command.ValueFlag{
 			{
 				Flag: command.Flag{

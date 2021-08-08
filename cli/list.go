@@ -14,6 +14,9 @@ func NewListExecutor() *listExecutor {
 func NewListTemplate() (template *command.Template) {
 	template = &command.Template{
 		Name: "list",
+		Description: command.Description{
+			Short: "print list of fics in your library",
+		},
 		ValueFlags: []command.ValueFlag{
 			{
 				Flag: command.Flag{

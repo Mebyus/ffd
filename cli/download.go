@@ -18,6 +18,9 @@ func NewDownloadExecutor() *downloadExecutor {
 func NewDownloadTemplate() (template *command.Template) {
 	template = &command.Template{
 		Name: "download",
+		Description: command.Description{
+			Short: "download a fic",
+		},
 		ValueFlags: []command.ValueFlag{
 			{
 				Flag: command.Flag{

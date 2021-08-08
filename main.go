@@ -15,6 +15,7 @@ func main() {
 		return
 	}
 	setting.Load()
+	command.Init("ffd", "", "Command line tool for downloading and tracking fics")
 	command.Register(cli.NewAddTemplate(), cli.NewAddExecutor())
 	command.Register(cli.NewBookmarkTemplate(), cli.NewBookmarkExecutor())
 	command.Register(cli.NewCheckTemplate(), cli.NewCheckExecutor())

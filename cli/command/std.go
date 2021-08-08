@@ -2,7 +2,13 @@ package command
 
 import "fmt"
 
-var stdDispatcher = NewDispatcher()
+var stdDispatcher = NewDispatcher("", "", "")
+
+func Init(name, version, description string) {
+	SetName(name)
+	SetStringVersion(version)
+	SetDescription(description)
+}
 
 func Register(template *Template, executor Executor) {
 	stdDispatcher.Register(template, executor)
@@ -18,4 +24,12 @@ func SetVersion(version fmt.Stringer) {
 
 func SetStringVersion(version string) {
 	stdDispatcher.SetStringVersion(version)
+}
+
+func SetName(name string) {
+	stdDispatcher.SetName(name)
+}
+
+func SetDescription(description string) {
+	stdDispatcher.SetDescription(description)
 }

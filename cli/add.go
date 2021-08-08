@@ -15,7 +15,11 @@ func NewAddExecutor() *addExecutor {
 
 func NewAddTemplate() (template *command.Template) {
 	template = &command.Template{
-		Name: "add",
+		Name:  "add",
+		Usage: "[options] <url>",
+		Description: command.Description{
+			Short: "add a fic to your library",
+		},
 		ValueFlags: []command.ValueFlag{
 			{
 				Flag: command.Flag{

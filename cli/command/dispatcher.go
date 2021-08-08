@@ -14,18 +14,31 @@ type pair struct {
 }
 
 type Dispatcher struct {
-	version string
-	pairs   map[string]*pair
+	name        string
+	version     string
+	description string
+	pairs       map[string]*pair
 }
 
-func NewDispatcher() *Dispatcher {
+func NewDispatcher(name, version, description string) *Dispatcher {
 	return &Dispatcher{
-		pairs: make(map[string]*pair),
+		name:        name,
+		version:     version,
+		description: description,
+		pairs:       make(map[string]*pair),
 	}
 }
 
 func (d *Dispatcher) SetVersion(version fmt.Stringer) {
 	d.version = version.String()
+}
+
+func (d *Dispatcher) SetName(name string) {
+	d.name = name
+}
+
+func (d *Dispatcher) SetDescription(description string) {
+	d.description = description
 }
 
 func (d *Dispatcher) Register(template *Template, executor Executor) {

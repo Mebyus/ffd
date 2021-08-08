@@ -17,9 +17,14 @@ func isHelpCommand(args []string) (isHelp bool, helpArgs []string) {
 }
 
 func (d *Dispatcher) displayGeneralHelp() {
+	fmt.Printf("%s\n\n", d.description)
+	fmt.Printf("List of recognized commands:\n\n")
 	for _, pair := range d.pairs {
-		fmt.Printf("    %s    %s\n", pair.template.Name, pair.template.Description.Short)
+		fmt.Printf("    %-16s %s\n", pair.template.Name, pair.template.Description.Short)
 	}
+	fmt.Printf("    %-16s %s\n", "version", "print version and exit")
+	fmt.Printf("    %-16s %s\n\n", "help", "print this message and exit")
+	fmt.Printf("Use \"%s help <command>\" for more information about a command.\n", d.name)
 }
 
 func (d *Dispatcher) displayCommandHelp(name string) {
@@ -28,7 +33,7 @@ func (d *Dispatcher) displayCommandHelp(name string) {
 		d.displayGeneralHelp()
 		return
 	}
-	pair.template.displayHelp()
+	pair.template.displayHelp(d.name)
 }
 
 func (d *Dispatcher) displayHelp(args []string) {
